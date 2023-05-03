@@ -17,6 +17,7 @@ from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
@@ -34,6 +35,20 @@ from .serializers import (
 )
 
 
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    """Viewset for managing subscriptions."""
+
+    queryset = Subscription.objects.all()
+    serializer_class = AuthorSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
 class UserViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin,
     mixins.RetrieveModelMixin, viewsets.GenericViewSet
@@ -47,59 +62,6 @@ class UserViewSet(
         if self.action == 'create':
             return CustomUserRegistrationSerializer
         return CustomUserInfoSerializer
-
-    @action(detail=False, permission_classes=[permissions.IsAuthenticated])
-    def subscriptions(self, request):
-        queryset = User.objects.filter(following__user=request.user)
-        page = self.paginate_queryset(queryset)
-        serializer = AuthorSubscriptionSerializer(
-            page,
-            many=True,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
-        )
-        return self.get_paginated_response(serializer.data)
-
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def follow(self, request, pk):
-        author = get_object_or_404(User, id=pk)
-        subscription = Subscription.objects.filter(
-            user=request.user, author=author)
-        if request.method == 'DELETE' and not subscription:
-            return Response(
-                {'errors': 'Unable to delete non-existent subscription.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if request.method == 'DELETE':
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        if subscription:
-            return Response(
-                {'errors': 'You are already following this user.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if author == request.user:
-            return Response(
-                {'errors': 'Unable to subscribe to yourself.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Subscription.objects.create(user=request.user, author=author)
-        serializer = AuthorSubscriptionSerializer(
-            author,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CurrentUserView(views.APIView):
@@ -181,53 +143,11 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
             return RecipeCreationSerializer
         return DetailedRecipeSerializer
 
-    def manage_recipe_list(self, model, recipe, request):
-        instance = model.objects.filter(recipe=recipe, user=request.user)
-        name = model.__name__
-        if request.method == 'DELETE' and not instance:
-            return Response(
-                {'errors': f'This recipe was not on your {name} list.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if request.method == 'DELETE':
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        if instance:
-            return Response(
-                {'errors': f'This recipe was already on your {name} list.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        model.objects.create(user=request.user, recipe=recipe)
-        serializer = RecipeLightSerializer(
-            recipe,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def manage_favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        return self.manage_recipe_list(Favorite, recipe, request)
+class DownloadShoppingCartView(views.APIView):
+    permission_classes = [IsAuthenticated]
 
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def manage_shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        return self.manage_recipe_list(ShoppingCart, recipe, request)
-
-    @action(detail=False, permission_classes=[permissions.IsAuthenticated])
-    def download_cart(self, request):
+    def get(self, request):
         header_font_size = 20
         body_font_size = 15
         header_left_margin = 100
@@ -288,3 +208,51 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         paper_sheet.showPage()
         paper_sheet.save()
         return response
+
+
+class FavoriteViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        favorite = Favorite.objects.filter(recipe=recipe, user=request.user).first()
+        if favorite:
+            return Response(
+                {'errors': 'This recipe is already in your favorites list.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        favorite = Favorite.objects.create(recipe=recipe, user=request.user)
+        serializer = RecipeLightSerializer(
+            favorite.recipe,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None):
+        favorite = get_object_or_404(Favorite, recipe_id=pk, user=request.user)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ShoppingCartViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        shopping_cart = ShoppingCart.objects.filter(recipe=recipe, user=request.user).first()
+        if shopping_cart:
+            return Response(
+                {'errors': 'This recipe is already in your shopping cart.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        shopping_cart = ShoppingCart.objects.create(recipe=recipe, user=request.user)
+        serializer = RecipeLightSerializer(
+            shopping_cart.recipe,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None):
+        shopping_cart = get_object_or_404(ShoppingCart, recipe_id=pk, user=request.user)
+        shopping_cart.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
