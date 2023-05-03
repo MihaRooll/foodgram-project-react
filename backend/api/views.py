@@ -47,7 +47,8 @@ class UserViewSet(
         serializer = AuthorSubscriptionSerializer(
             page,
             many=True,
-            context={"request": request, "format": self.format_kwarg, "view": self},
+            context={
+                "request": request, "format": self.format_kwarg, "view": self},
         )
         return self.get_paginated_response(serializer.data)
 
@@ -58,7 +59,8 @@ class UserViewSet(
     )
     def follow(self, request, pk):
         author = get_object_or_404(User, id=pk)
-        subscription = Subscription.objects.filter(user=request.user, author=author)
+        subscription = Subscription.objects.filter(
+            user=request.user, author=author)
         if request.method == "DELETE" and not subscription:
             return Response(
                 {"errors": "Unable to delete non-existent subscription."},
@@ -80,7 +82,8 @@ class UserViewSet(
         Subscription.objects.create(user=request.user, author=author)
         serializer = AuthorSubscriptionSerializer(
             author,
-            context={"request": request, "format": self.format_kwarg, "view": self},
+            context={
+                "request": request, "format": self.format_kwarg, "view": self},
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -93,7 +96,8 @@ class CurrentUserView(views.APIView):
     def get(self, request):
         serializer = CustomUserInfoSerializer(
             request.user,
-            context={"request": request, "format": self.format_kwarg, "view": self},
+            context={
+                "request": request, "format": self.format_kwarg, "view": self},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -106,7 +110,8 @@ class ChangePasswordView(views.APIView):
     def post(self, request):
         serializer = CustomChangePasswordSerializer(
             data=request.data,
-            context={"request": request, "format": self.format_kwarg, "view": self},
+            context={
+                "request": request, "format": self.format_kwarg, "view": self},
         )
         if serializer.is_valid():
             self.request.user.set_password(serializer.data["new_password"])
@@ -140,7 +145,8 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
 
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = Recipe.objects.all()
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend]
     filterset_class = RecipeFilter
 
@@ -182,7 +188,8 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
             total = ingredient["total"]
             line = bullet_point_symbol + f" {name} - {total} {unit}"
             recipes = recipes_ingredients.filter(ingredient__name=name)
-            recipes_names = [(item.recipe.name, item.amount) for item in recipes]
+            recipes_names = [
+                (item.recipe.name, item.amount) for item in recipes]
             shopping_list.append((line, recipes_names))
 
         response = HttpResponse(content_type="application/pdf")
@@ -191,7 +198,8 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         registerFont(TTFont("FreeSans", "FreeSans.ttf"))
 
         paper_sheet.setFont("FreeSans", header_font_size)
-        paper_sheet.drawString(header_left_margin, header_height, "Список покупок")
+        paper_sheet.drawString(
+            header_left_margin, header_height, "Список покупок")
 
         paper_sheet.setFont("FreeSans", body_font_size)
         y_coordinate = body_first_line_height
@@ -205,7 +213,8 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
                     y_coordinate = body_first_line_height
                     paper_sheet.setFont("FreeSans", body_font_size)
                 recipe_line = f"  {recipe_name[0]} ({recipe_name[1]})"
-                paper_sheet.drawString(body_left_margin, y_coordinate, recipe_line)
+                paper_sheet.drawString(
+                    body_left_margin, y_coordinate, recipe_line)
                 y_coordinate -= line_spacing
 
             if y_coordinate <= bottom_margin:
@@ -242,7 +251,8 @@ class BaseRecipeListManagementViewSet(viewsets.ViewSet):
         self.model.objects.create(user=request.user, recipe=recipe)
         serializer = RecipeLightSerializer(
             recipe,
-            context={"request": request, "format": self.format_kwarg, "view": self},
+            context={
+                "request": request, "format": self.format_kwarg, "view": self},
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

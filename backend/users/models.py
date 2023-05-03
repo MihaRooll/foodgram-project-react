@@ -32,10 +32,12 @@ class Subscription(models.Model):
     """Class to store user subscriptions in the database."""
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="follower", verbose_name="Follower"
+        User, on_delete=models.CASCADE,
+        related_name="follower", verbose_name="Follower"
     )
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="following", verbose_name="Author"
+        User, on_delete=models.CASCADE,
+        related_name="following", verbose_name="Author"
     )
 
     class Meta:
@@ -47,7 +49,8 @@ class Subscription(models.Model):
                 fields=["user", "author"], name="unique_subscription"
             ),
             models.CheckConstraint(
-                check=~models.Q(user=models.F("author")), name="no_self_subscription"
+                check=~models.Q(user=models.F("author")),
+                name="no_self_subscription"
             ),
         ]
 

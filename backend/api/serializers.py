@@ -55,7 +55,7 @@ class CustomUserInfoSerializer(UserSerializer):
         return obj.following.filter(user=request.user).exists()
 
 
-class CustomChangePasswordSerializer(PasswordSerializer, CurrentPasswordSerializer):
+class CustomChangePasswordSerializer(PasswordSerializer, CurrentPasswordSerializer): # noqa
     """Сериализатор для изменения пароля текущего пользователя."""
 
     pass
@@ -114,7 +114,8 @@ class RecipeIngredientDetailsSerializer(serializers.ModelSerializer):
 
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit")
 
     class Meta:
         model = RecipeIngredients
@@ -193,7 +194,8 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
 class RecipeCreationSerializer(DetailedRecipeSerializer):
     """Сериализатор для создания и обновления рецептов."""
 
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
         source="recipeingredients", many=True
     )
@@ -204,7 +206,8 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
                 "Unable to add the same tag multiple times."
             )
 
-        ingredients = [item["ingredient"] for item in attrs["recipeingredients"]]
+        ingredients = [
+            item["ingredient"] for item in attrs["recipeingredients"]]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
                 "Unable to add the same ingredient multiple times."

@@ -23,7 +23,8 @@ class IngredientFilter(rf_filters.FilterSet):
             )
             .annotate(
                 is_start=ExpressionWrapper(
-                    Q(**{startswith_lookup: value}), output_field=BooleanField()
+                    Q(**{startswith_lookup: value}),
+                    output_field=BooleanField()
                 )
             )
             .order_by("-is_start")
@@ -35,7 +36,8 @@ class RecipeFilter(rf_filters.FilterSet):
 
     tags = rf_filters.AllValuesMultipleFilter(field_name="tags__slug")
     is_favorited = rf_filters.NumberFilter(method="recipe_boolean_methods")
-    is_in_shopping_cart = rf_filters.NumberFilter(method="recipe_boolean_methods")
+    is_in_shopping_cart = rf_filters.NumberFilter(
+        method="recipe_boolean_methods")
 
     class Meta:
         model = Recipe
@@ -47,7 +49,8 @@ class RecipeFilter(rf_filters.FilterSet):
         user = self.request.user
         if user.is_anonymous:
             return queryset
-        recipe_ids = [r.pk for r in queryset if getattr(r, name)(user) == value]
+        recipe_ids = [
+            r.pk for r in queryset if getattr(r, name)(user) == value]
         if recipe_ids:
             return queryset.filter(pk__in=recipe_ids)
         return queryset.none()
