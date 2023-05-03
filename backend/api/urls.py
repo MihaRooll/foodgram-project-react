@@ -7,23 +7,22 @@ from . import views
 router = DefaultRouter()
 
 # Регистрация маршрутов для различных представлений
-router.register('users', views.UserViewSet)  # пользователи
-router.register('tags', views.TagDisplayViewSet)  # теги
-router.register('ingredients', views.IngredientDisplayViewSet)  # ингредиенты
-router.register('recipes', views.RecipeManagementViewSet)  # рецепты
+router.register("users", views.UserViewSet)  # пользователи
+router.register("tags", views.TagDisplayViewSet)  # теги
+router.register("ingredients", views.IngredientDisplayViewSet)  # ингредиенты
+router.register("recipes", views.RecipeManagementViewSet)  # рецепты
+router.register("favorites", views.FavoriteViewSet, basename="favorite")  # избранное
 router.register(
-    'favorites', views.FavoriteViewSet, basename='favorite')  # избранное
-router.register(
-    'shopping_cart',
-    views.ShoppingCartViewSet, basename='shopping_cart')  # корзина
+    "shopping_cart", views.ShoppingCartViewSet, basename="shopping_cart"
+)  # корзина
 
 urlpatterns = [
     # Маршрут для получения данных о текущем пользователе
-    path('users/me/', views.CurrentUserView.as_view()),
+    path("users/me/", views.CurrentUserView.as_view()),
     # Маршрут для изменения пароля текущего пользователя
-    path('users/set_password/', views.ChangePasswordView.as_view()),
+    path("users/set_password/", views.ChangePasswordView.as_view()),
     # Включение маршрутов, зарегистрированных в маршрутизаторе
-    path('', include(router.urls)),
+    path("", include(router.urls)),
     # Маршруты для аутентификации с использованием токенов
-    path('auth/', include('djoser.urls.authtoken')),
+    path("auth/", include("djoser.urls.authtoken")),
 ]

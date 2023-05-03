@@ -16,15 +16,21 @@ class RecipeAdmin(admin.ModelAdmin):
     """Class to customize recipes display in admin panel."""
 
     list_display = [
-        'pk', 'name', 'author', 'text', 'cooking_time',
-        'total_favorites', 'pub_date']
-    search_fields = ['name', 'author', 'cooking_time', 'text']
-    readonly_fields = ['total_favorites']
-    list_filter = ['name', 'pub_date', 'author', 'tags']
-    empty_value_display = '-empty-'
+        "pk",
+        "name",
+        "author",
+        "text",
+        "cooking_time",
+        "total_favorites",
+        "pub_date",
+    ]
+    search_fields = ["name", "author", "cooking_time", "text"]
+    readonly_fields = ["total_favorites"]
+    list_filter = ["name", "pub_date", "author", "tags"]
+    empty_value_display = "-empty-"
     inlines = [RecipeIngredientsInline]
 
-    @admin.display(description='Total favorites')
+    @admin.display(description="Total favorites")
     def total_favorites(self, obj):
         return obj.favorites.count()
 
@@ -33,17 +39,17 @@ class RecipeAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     """Class to customize tags display in admin panel."""
 
-    list_display = ['pk', 'name', 'color', 'slug']
-    search_fields = ['name', 'color', 'slug']
+    list_display = ["pk", "name", "color", "slug"]
+    search_fields = ["name", "color", "slug"]
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Class to customize ingredients display in admin panel."""
 
-    list_display = ['pk', 'name', 'measurement_unit']
-    search_fields = ['name', 'measurement_unit']
-    list_filter = ['name', 'measurement_unit']
+    list_display = ["pk", "name", "measurement_unit"]
+    search_fields = ["name", "measurement_unit"]
+    list_filter = ["name", "measurement_unit"]
     inlines = [RecipeIngredientsInline]
 
 
@@ -51,24 +57,24 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeIngredientsAdmin(admin.ModelAdmin):
     """Class to customize ingredients of recipes display in admin panel."""
 
-    list_display = ['pk', 'recipe', 'ingredient', 'amount']
-    search_fields = ['recipe', 'ingredient']
-    list_filter = ['recipe', 'ingredient']
+    list_display = ["pk", "recipe", "ingredient", "amount"]
+    search_fields = ["recipe", "ingredient"]
+    list_filter = ["recipe", "ingredient"]
 
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     """Class to customize users' favorite recipes display in admin panel."""
 
-    list_display = ['pk', 'user', 'recipe']
-    search_fields = ['user', 'recipe']
-    list_filter = ['user', 'recipe']
+    list_display = ["pk", "user", "recipe"]
+    search_fields = ["user", "recipe"]
+    list_filter = ["user", "recipe"]
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     """Class to customize users' shopping carts display in admin panel."""
 
-    list_display = ['pk', 'user', 'recipe']
-    search_fields = ['user', 'recipe']
-    list_filter = ['user', 'recipe']
+    list_display = ["pk", "user", "recipe"]
+    search_fields = ["user", "recipe"]
+    list_filter = ["user", "recipe"]

@@ -2,14 +2,8 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as rf_filters
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredients,
-    ShoppingCart,
-    Tag,
-)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredients,
+                            ShoppingCart, Tag)
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import registerFont
 from reportlab.pdfbase.ttfonts import TTFont
@@ -21,22 +15,20 @@ from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (
-    CustomChangePasswordSerializer,
-    CustomUserRegistrationSerializer,
-    CustomUserInfoSerializer,
-    CustomIngredientSerializer,
-    RecipeCreationSerializer,
-    DetailedRecipeSerializer,
-    CustomTagSerializer,
-    AuthorSubscriptionSerializer,
-    RecipeLightSerializer,
-)
+from .serializers import (AuthorSubscriptionSerializer,
+                          CustomChangePasswordSerializer,
+                          CustomIngredientSerializer, CustomTagSerializer,
+                          CustomUserInfoSerializer,
+                          CustomUserRegistrationSerializer,
+                          DetailedRecipeSerializer, RecipeCreationSerializer,
+                          RecipeLightSerializer)
 
 
 class UserViewSet(
-    mixins.CreateModelMixin, mixins.ListModelMixin,
-    mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
 ):
     """Viewset for users registration and displaying."""
 
@@ -44,7 +36,7 @@ class UserViewSet(
     permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == "create":
             return CustomUserRegistrationSerializer
         return CustomUserInfoSerializer
 
@@ -55,49 +47,40 @@ class UserViewSet(
         serializer = AuthorSubscriptionSerializer(
             page,
             many=True,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
+            context={"request": request, "format": self.format_kwarg, "view": self},
         )
         return self.get_paginated_response(serializer.data)
 
     @action(
-        methods=['post', 'delete'],
+        methods=["post", "delete"],
         detail=True,
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=[permissions.IsAuthenticated],
     )
     def follow(self, request, pk):
         author = get_object_or_404(User, id=pk)
-        subscription = Subscription.objects.filter(
-            user=request.user, author=author)
-        if request.method == 'DELETE' and not subscription:
+        subscription = Subscription.objects.filter(user=request.user, author=author)
+        if request.method == "DELETE" and not subscription:
             return Response(
-                {'errors': 'Unable to delete non-existent subscription.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Unable to delete non-existent subscription."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        if request.method == 'DELETE':
+        if request.method == "DELETE":
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         if subscription:
             return Response(
-                {'errors': 'You are already following this user.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"errors": "You are already following this user."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         if author == request.user:
             return Response(
-                {'errors': 'Unable to subscribe to yourself.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Unable to subscribe to yourself."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         Subscription.objects.create(user=request.user, author=author)
         serializer = AuthorSubscriptionSerializer(
             author,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
+            context={"request": request, "format": self.format_kwarg, "view": self},
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -110,11 +93,7 @@ class CurrentUserView(views.APIView):
     def get(self, request):
         serializer = CustomUserInfoSerializer(
             request.user,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
+            context={"request": request, "format": self.format_kwarg, "view": self},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -127,14 +106,10 @@ class ChangePasswordView(views.APIView):
     def post(self, request):
         serializer = CustomChangePasswordSerializer(
             data=request.data,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
+            context={"request": request, "format": self.format_kwarg, "view": self},
         )
         if serializer.is_valid():
-            self.request.user.set_password(serializer.data['new_password'])
+            self.request.user.set_password(serializer.data["new_password"])
             self.request.user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -163,10 +138,9 @@ class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeManagementViewSet(viewsets.ModelViewSet):
     """Viewset for recipes."""
 
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ["get", "post", "patch", "delete"]
     queryset = Recipe.objects.all()
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend]
     filterset_class = RecipeFilter
 
@@ -177,7 +151,7 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def get_serializer_class(self):
-        if self.action in ['create', 'partial_update']:
+        if self.action in ["create", "partial_update"]:
             return RecipeCreationSerializer
         return DetailedRecipeSerializer
 
@@ -191,35 +165,35 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         body_first_line_height = 740
         line_spacing = 20
         bottom_margin = 100
-        bullet_point_symbol = u'\u2022'
+        bullet_point_symbol = "\u2022"
 
         recipes_ingredients = RecipeIngredients.objects.filter(
-            recipe__shopping__user=request.user).order_by('ingredient')
+            recipe__shopping__user=request.user
+        ).order_by("ingredient")
         cart = recipes_ingredients.values(
-            'ingredient__name', 'ingredient__measurement_unit',
-        ).annotate(total=Sum('amount'))
+            "ingredient__name",
+            "ingredient__measurement_unit",
+        ).annotate(total=Sum("amount"))
 
         shopping_list = []
         for ingredient in cart:
-            name = ingredient['ingredient__name']
-            unit = ingredient['ingredient__measurement_unit']
-            total = ingredient['total']
-            line = bullet_point_symbol + f' {name} - {total} {unit}'
+            name = ingredient["ingredient__name"]
+            unit = ingredient["ingredient__measurement_unit"]
+            total = ingredient["total"]
+            line = bullet_point_symbol + f" {name} - {total} {unit}"
             recipes = recipes_ingredients.filter(ingredient__name=name)
-            recipes_names = [
-                (item.recipe.name, item.amount) for item in recipes]
+            recipes_names = [(item.recipe.name, item.amount) for item in recipes]
             shopping_list.append((line, recipes_names))
 
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="shopping.pdf"'
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="shopping.pdf"'
         paper_sheet = canvas.Canvas(response, pagesize=A4)
-        registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
+        registerFont(TTFont("FreeSans", "FreeSans.ttf"))
 
-        paper_sheet.setFont('FreeSans', header_font_size)
-        paper_sheet.drawString(
-            header_left_margin, header_height, 'Список покупок')
+        paper_sheet.setFont("FreeSans", header_font_size)
+        paper_sheet.drawString(header_left_margin, header_height, "Список покупок")
 
-        paper_sheet.setFont('FreeSans', body_font_size)
+        paper_sheet.setFont("FreeSans", body_font_size)
         y_coordinate = body_first_line_height
         for ingredient, recipes_names in shopping_list:
             paper_sheet.drawString(body_left_margin, y_coordinate, ingredient)
@@ -229,16 +203,15 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
                 if y_coordinate <= bottom_margin:
                     paper_sheet.showPage()
                     y_coordinate = body_first_line_height
-                    paper_sheet.setFont('FreeSans', body_font_size)
-                recipe_line = f'  {recipe_name[0]} ({recipe_name[1]})'
-                paper_sheet.drawString(
-                    body_left_margin, y_coordinate, recipe_line)
+                    paper_sheet.setFont("FreeSans", body_font_size)
+                recipe_line = f"  {recipe_name[0]} ({recipe_name[1]})"
+                paper_sheet.drawString(body_left_margin, y_coordinate, recipe_line)
                 y_coordinate -= line_spacing
 
             if y_coordinate <= bottom_margin:
                 paper_sheet.showPage()
                 y_coordinate = body_first_line_height
-                paper_sheet.setFont('FreeSans', body_font_size)
+                paper_sheet.setFont("FreeSans", body_font_size)
 
         paper_sheet.showPage()
         paper_sheet.save()
@@ -253,34 +226,30 @@ class BaseRecipeListManagementViewSet(viewsets.ViewSet):
         instance = self.model.objects.filter(recipe=recipe, user=request.user)
         name = self.model.__name__
 
-        if request.method == 'DELETE' and not instance:
+        if request.method == "DELETE" and not instance:
             return Response(
-                {'errors': f'This recipe was not on your {name} list.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"errors": f"This recipe was not on your {name} list."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        if request.method == 'DELETE':
+        if request.method == "DELETE":
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         if instance:
             return Response(
-                {'errors': f'This recipe was already on your {name} list.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"errors": f"This recipe was already on your {name} list."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         self.model.objects.create(user=request.user, recipe=recipe)
         serializer = RecipeLightSerializer(
             recipe,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
+            context={"request": request, "format": self.format_kwarg, "view": self},
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(
-        methods=['post', 'delete'],
+        methods=["post", "delete"],
         detail=True,
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=[permissions.IsAuthenticated],
     )
     def manage_list(self, request, pk):
         return self.manage_recipe_list(request, pk)
