@@ -2,17 +2,11 @@ from collections import OrderedDict
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers
-
-from djoser.serializers import (
-CurrentPasswordSerializer,
-PasswordSerializer,
-UserCreateSerializer,
-UserSerializer,
-)
-
+from djoser.serializers import (CurrentPasswordSerializer, PasswordSerializer,
+                                UserCreateSerializer, UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, Recipe, RecipeIngredients, Tag
+from rest_framework import serializers
 from users.models import User
 
 
@@ -46,8 +40,8 @@ class CustomUserInfoSerializer(UserSerializer):
             'last_name', 'is_subscribed',
         )
 
-    def get_is_subscribed(self, obj):
-        request = self.context.get("request")
+    def get_subscription_status(self, obj):
+        request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
         return obj.following.filter(user=request.user).exists()
