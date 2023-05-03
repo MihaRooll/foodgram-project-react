@@ -17,7 +17,7 @@ router.register(
 )  # избранное
 router.register(
     "shopping_cart", views.ShoppingCartViewSet, basename="shopping_cart"
-)  # корзина
+)  # корзин
 
 urlpatterns = [
     # Маршрут для получения данных о текущем пользователе
