@@ -11,7 +11,9 @@ router.register("users", views.UserViewSet)  # пользователи
 router.register("tags", views.TagDisplayViewSet)  # теги
 router.register("ingredients", views.IngredientDisplayViewSet)  # ингредиенты
 router.register("recipes", views.RecipeManagementViewSet)  # рецепты
-router.register("favorites", views.FavoriteViewSet, basename="favorite")  # избранное
+router.register(
+    "favorites", views.FavoriteViewSet, basename="favorite"
+)  # избранное
 router.register(
     "shopping_cart", views.ShoppingCartViewSet, basename="shopping_cart"
 )  # корзина
