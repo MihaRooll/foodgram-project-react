@@ -201,7 +201,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     )
 
     def validate(self, attrs):
-        if len(attrs["tags"]) > len(set(attrs["tags"])):
+        if "tags" in attrs and len(attrs["tags"]) > len(set(attrs["tags"])):
             raise serializers.ValidationError(
                 "Unable to add the same tag multiple times."
             )
