@@ -14,7 +14,7 @@ router.register('ingredients', IngredientDisplayViewSet)  # ингредиент
 router.register('recipes', RecipeManagementViewSet)  # рецепты
 
 urlpatterns = [
-    # Маршрут для получения данных о текущем пользователе
+    # Маршрут для получения данных о текущем пользовател
     path('users/me/', CurrentUserView.as_view()),
     # Маршрут для изменения пароля текущего пользователя
     path('users/set_password/', ChangePasswordView.as_view()),
