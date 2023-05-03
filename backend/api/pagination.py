@@ -10,7 +10,7 @@ class CustomPageNumberPagination(PageNumberPagination):
     # элементов на странице
     page_size_query_param = "limit"
 
-    # Оптимизация для уменьшения нагрузки на базу данны
+    # Оптимизация для уменьшения нагрузки на базу данных
     max_page_size = 100
 
     # Оптимизация для ускорения рендеринга страницы
