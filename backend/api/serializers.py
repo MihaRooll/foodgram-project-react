@@ -260,13 +260,6 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     class Meta:
         model = Recipe
         fields = ("id", "name", "image", "cooking_time")
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all(),
-                fields=('author', 'name'),
-                message="A recipe with this name already exists for this author.",
-            )
-        ]
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
