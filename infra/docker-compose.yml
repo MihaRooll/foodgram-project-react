@@ -9,7 +9,7 @@ services:
     env_file: ./.env
 
   web:
-    image: miharoll/foodgram:v.1
+    image: miharoll/foodgram:v.01
     restart: always
     volumes:
       - static_value:/app/static_backend/
