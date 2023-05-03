@@ -191,6 +191,11 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
         return obj.is_in_shopping_cart(request.user)
 
 
+class CustomUniqueTogetherValidator(UniqueTogetherValidator):
+    def enforce_required_fields(self, attrs, serializer):
+        return
+
+
 class RecipeCreationSerializer(DetailedRecipeSerializer):
     """Сериализатор для создания и обновления рецептов."""
 
@@ -254,7 +259,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         model = Recipe
         fields = ("id", "name", "image", "cooking_time")
         validators = [
-            UniqueTogetherValidator(
+            CustomUniqueTogetherValidator(
                 queryset=Recipe.objects.all(),
                 fields=('author', 'name'),
                 message="A recipe with this name already exists for this author.",
