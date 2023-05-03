@@ -243,7 +243,7 @@ class FavoriteViewSet(viewsets.ViewSet):
 
 
 class ShoppingCartViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated] #
 
     def create(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
