@@ -135,16 +135,10 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
-        try:
-            serializer.save(author=self.request.user)
-        except IntegrityError:
-            raise serializers.ValidationError("A recipe with this name already exists for this author.")
+        serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
-        try:
-            serializer.save(author=self.request.user)
-        except IntegrityError:
-            raise serializers.ValidationError("A recipe with this name already exists for this author.")
+        serializer.save(author=self.request.user)
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
