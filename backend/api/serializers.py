@@ -7,6 +7,7 @@ from djoser.serializers import (CurrentPasswordSerializer, PasswordSerializer,
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, Recipe, RecipeIngredients, Tag
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
 
 
@@ -53,7 +54,6 @@ class CustomUserInfoSerializer(UserSerializer):
         if not request or request.user.is_anonymous:
             return False
         return obj.following.filter(user=request.user).exists()
-
 
 class CustomChangePasswordSerializer(PasswordSerializer, CurrentPasswordSerializer): # noqa
     """Сериализатор для изменения пароля текущего пользователя."""
@@ -256,6 +256,17 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             tag_list.append(serialized_tag)
         repr["tags"] = tag_list
         return repr
+    
+    class Meta:
+        model = Recipe
+        fields = ("id", "name", "image", "cooking_time")
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Recipe.objects.all(),
+                fields=('author', 'name'),
+                message="A recipe with this name already exists for this author.",
+            )
+        ]
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):

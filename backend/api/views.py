@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as rf_filters
@@ -16,6 +17,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from users.models import Subscription, User
@@ -133,10 +135,16 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        try:
+            serializer.save(author=self.request.user)
+        except IntegrityError:
+            raise serializers.ValidationError("A recipe with this name already exists for this author.")
 
     def perform_update(self, serializer):
-        serializer.save(author=self.request.user)
+        try:
+            serializer.save(author=self.request.user)
+        except IntegrityError:
+            raise serializers.ValidationError("A recipe with this name already exists for this author.")
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
