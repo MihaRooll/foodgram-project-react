@@ -197,20 +197,19 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
-        source="recipeingredients", many=True
-    )
+        source='recipeingredients', many=True)
 
     def validate(self, attrs):
-        if len(attrs["tags"]) > len(set(attrs["tags"])):
+        if len(attrs['tags']) > len(set(attrs['tags'])):
             raise serializers.ValidationError(
-                "Unable to add the same tag multiple times."
+                'Unable to add the same tag multiple times.'
             )
 
         ingredients = [
-            item["ingredient"] for item in attrs["recipeingredients"]]
+            item['ingredient'] for item in attrs['recipeingredients']]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
-                "Unable to add the same ingredient multiple times."
+                'Unable to add the same ingredient multiple times.'
             )
 
         return attrs
@@ -220,8 +219,8 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         recipe_ingredients = [
             RecipeIngredients(
                 recipe=recipe,
-                ingredient=current_ingredient["ingredient"],
-                amount=current_ingredient["amount"],
+                ingredient=current_ingredient['ingredient'],
+                amount=current_ingredient['amount'],
             )
             for current_ingredient in ingredients
         ]
@@ -229,8 +228,8 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        tags = validated_data.pop("tags")
-        ingredients = validated_data.pop("recipeingredients")
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('recipeingredients')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.set_recipe_ingredients(recipe, ingredients)
@@ -238,8 +237,8 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        tags = validated_data.pop("tags")
-        ingredients = validated_data.pop("recipeingredients")
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('recipeingredients')
         instance.ingredients.clear()
         instance.tags.clear()
         super().update(instance, validated_data)
@@ -249,24 +248,13 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
-        tag_id_list, tag_list = repr["tags"], []
+        tag_id_list, tag_list = repr['tags'], []
         for tag_id in tag_id_list:
             tag = get_object_or_404(Tag, id=tag_id)
             serialized_tag = OrderedDict(CustomTagSerializer(tag).data)
             tag_list.append(serialized_tag)
-        repr["tags"] = tag_list
+        repr['tags'] = tag_list
         return repr
-    
-    class Meta:
-        model = Recipe
-        fields = ("id", "name", "image", "cooking_time")
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all(),
-                fields=('author', 'name'),
-                message="A recipe with this name already exists for this author.",
-            )
-        ]
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
