@@ -194,24 +194,17 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
 class RecipeCreationSerializer(DetailedRecipeSerializer):
     """Сериализатор для создания и обновления рецептов."""
 
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all())
-    ingredients = RecipeCreationIngredientSerializer(
-        source="recipeingredients", many=True
-    )
+    author = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    ingredients = RecipeCreationIngredientSerializer(source="recipeingredients", many=True)
 
     def validate(self, attrs):
         if len(attrs["tags"]) > len(set(attrs["tags"])):
-            raise serializers.ValidationError(
-                "Unable to add the same tag multiple times."
-            )
+            raise serializers.ValidationError("Unable to add the same tag multiple times.")
 
-        ingredients = [
-            item["ingredient"] for item in attrs["recipeingredients"]]
+        ingredients = [item["ingredient"] for item in attrs["recipeingredients"]]
         if len(ingredients) > len(set(ingredients)):
-            raise serializers.ValidationError(
-                "Unable to add the same ingredient multiple times."
-            )
+            raise serializers.ValidationError("Unable to add the same ingredient multiple times.")
 
         return attrs
 

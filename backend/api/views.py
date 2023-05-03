@@ -135,10 +135,10 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save()
 
     def perform_update(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save()
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
