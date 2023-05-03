@@ -288,4 +288,3 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         paper_sheet.showPage()
         paper_sheet.save()
         return response
-
