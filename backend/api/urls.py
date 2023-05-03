@@ -1,31 +1,26 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from . import views
+from .views import (ChangePasswordView, CurrentUserView,
+                    IngredientDisplayViewSet, RecipeManagementViewSet,
+                    TagDisplayViewSet, UserViewSet)
 
 # Создание маршрутизатора для API
 router = DefaultRouter()
-
 # Регистрация маршрутов для различных представлений
-router.register("users", views.UserViewSet)  # пользователи
-router.register('subscriptions', views.SubscriptionViewSet)
-router.register("tags", views.TagDisplayViewSet)  # теги
-router.register("ingredients", views.IngredientDisplayViewSet)  # ингредиенты
-router.register("recipes", views.RecipeManagementViewSet)  # рецепты
-router.register(
-    "favorites", views.FavoriteViewSet, basename="favorite"
-)  # избранное
-router.register(
-    "shopping_cart", views.ShoppingCartViewSet, basename="shopping_cart"
-)  # корзин
+router.register('users', UserViewSet)  # пользователи
+router.register('tags', TagDisplayViewSet)  # теги
+router.register('ingredients', IngredientDisplayViewSet)  # ингредиенты
+router.register('recipes', RecipeManagementViewSet)  # рецепты
 
 urlpatterns = [
     # Маршрут для получения данных о текущем пользователе
-    path("users/me/", views.CurrentUserView.as_view()),
+    path('users/me/', CurrentUserView.as_view()),
     # Маршрут для изменения пароля текущего пользователя
-    path("users/set_password/", views.ChangePasswordView.as_view()),
+    path('users/set_password/', ChangePasswordView.as_view()),
     # Включение маршрутов, зарегистрированных в маршрутизаторе
-    path("", include(router.urls)),
+    path('', include(router.urls)),
     # Маршруты для аутентификации с использованием токенов
-    path("auth/", include("djoser.urls.authtoken")),
+    path('auth/', include('djoser.urls.authtoken')),
 ]
+

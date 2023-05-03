@@ -14,26 +14,24 @@ ALREADY_LOADED_ERROR_MESSAGE = """
 DATA_FILE_PATH = Path(
     # Путь для локальной разработки:
     # Path(BASE_DIR).parent.parent, 'data', 'recipes_ingredient.csv')
-    Path(BASE_DIR),
-    "recipes_ingredient.csv",
-)
+    Path(BASE_DIR), 'recipes_ingredient.csv')
 
 
 class Command(BaseCommand):
     """Загружает данные об ингредиентах из файла csv в базу данных."""
 
-    help = "Загружает данные об ингредиентах из файла csv в базу данных"
+    help = 'Загружает данные об ингредиентах из файла csv в базу данных'
 
     def handle(self, *args, **options):
+
         if Ingredient.objects.exists():
-            self.stderr.write("Данные об ингредиентах уже загружены... выход.")
+            self.stderr.write('Данные об ингредиентах уже загружены... выход.')
             self.stderr.write(ALREADY_LOADED_ERROR_MESSAGE)
             return
 
-        self.stdout.write("Загрузка данных об ингредиентах")
+        self.stdout.write('Загрузка данных об ингредиентах')
 
-        for row in DictReader(open(DATA_FILE_PATH, encoding="utf-8")):
+        for row in DictReader(open(DATA_FILE_PATH, encoding='utf-8')):
             ingr = Ingredient(
-                name=row["name"], measurement_unit=row["measurement_unit"]
-            )
+                name=row['name'], measurement_unit=row['measurement_unit'])
             ingr.save()
