@@ -40,11 +40,12 @@ class CustomUserInfoSerializer(UserSerializer):
             'last_name', 'is_subscribed', 
         ) 
  
-    def get_subscription_status(self, obj): 
-        request = self.context.get('request') 
-        if not request or request.user.is_anonymous: 
-            return False 
-        return obj.following.filter(user=request.user).exists() 
+    def get_is_subscribed(self, obj):
+        request = self.context.get("request")
+        if not request or request.user.is_anonymous:
+            return False
+        return obj.following.filter(user=request.user).exists()
+
  
  
 class CustomChangePasswordSerializer( 
