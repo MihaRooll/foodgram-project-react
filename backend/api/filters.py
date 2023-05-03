@@ -32,7 +32,8 @@ class RecipeFilter(rf_filters.FilterSet):
 
     tags = rf_filters.AllValuesMultipleFilter(field_name='tags__slug')
     is_favorited = rf_filters.NumberFilter(method='recipe_boolean_methods')
-    is_in_shopping_cart = rf_filters.NumberFilter(method='recipe_boolean_methods')
+    is_in_shopping_cart = rf_filters.NumberFilter(
+        method='recipe_boolean_methods')
 
     class Meta:
         model = Recipe

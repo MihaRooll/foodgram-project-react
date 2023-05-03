@@ -5,11 +5,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from djoser.serializers import (
-CurrentPasswordSerializer,
-PasswordSerializer,
-UserCreateSerializer,
-UserSerializer,
-)
+    CurrentPasswordSerializer,
+    PasswordSerializer,
+    UserCreateSerializer,
+    UserSerializer)
 
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, Recipe, RecipeIngredients, Tag
@@ -103,6 +102,7 @@ class CustomIngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = '__all__'
 
+
 class RecipeIngredientDetailsSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения ингредиентов конкретного рецепта."""
 
@@ -120,7 +120,7 @@ class RecipeCreationIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения ингредиентов при создании рецепта."""
 
     id = serializers.PrimaryKeyRelatedField(
-        source='ingredient', queryset=Ingredient.objects.all())
+        source='ingredient', queryset=Ingredient.objects.all()) # noqa
 
     class Meta:
         model = RecipeIngredients
@@ -165,6 +165,7 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
         if not request or request.user.is_anonymous:
             return False
         return obj.is_in_shopping_cart(request.user)
+
 
 class RecipeCreationSerializer(DetailedRecipeSerializer):
     """Сериализатор для создания и обновления рецептов."""

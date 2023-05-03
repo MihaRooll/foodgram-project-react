@@ -45,27 +45,6 @@ class Ingredient(models.Model):
         return f"{self.name} ({self.measurement_unit})"
 
 
-class RecipeIngredients(models.Model):
-    """Class to store ingredients of a particular recipe in the database."""
-
-    ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients', verbose_name='Ингредиент')
-    amount = models.PositiveIntegerField('Количество', validators=[MinValueValidator(1)])
-
-    class Meta:
-        verbose_name = 'Ингредиент рецепта'
-        verbose_name_plural = 'Ингредиенты рецептов'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['ingredient'],
-                name='unique_recipe_ingredient'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.amount} {self.ingredient}'
-
-
 class Recipe(models.Model):
     """Class to store recipes in the database."""
 
@@ -78,7 +57,7 @@ class Recipe(models.Model):
         verbose_name='Автор'
     )
     ingredients = models.ManyToManyField(
-        RecipeIngredients,
+        Ingredient,
         through='RecipeIngredients',
         related_name='recipes',
         verbose_name='Ингредиенты'
@@ -110,6 +89,34 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeIngredients(models.Model):
+    """Class to store ingredients of a particular recipe in the database."""
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингредиент')
+    amount = models.PositiveIntegerField(
+        'Количество', validators=[MinValueValidator(1)])
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE,
+        related_name='recipe_ingredients',
+        verbose_name='Рецепт')
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_recipe_ingredient'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.amount} {self.ingredient}'
 
 
 class Favorite(models.Model):

@@ -5,7 +5,7 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredients,
 
 
 class RecipeIngredientsInline(admin.TabularInline):
-    """Класс для отображения модели RecipeIngredients в виде встроенного блока."""
+    """Inline class for the RecipeIngredients model display."""
 
     model = RecipeIngredients
     extra = 1
@@ -13,7 +13,7 @@ class RecipeIngredientsInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    """Класс для настройки отображения рецептов в панели администратора."""
+    """Class to customize recipes display in admin panel."""
 
     list_display = [
         'pk', 'name', 'author', 'text', 'cooking_time',
@@ -24,14 +24,14 @@ class RecipeAdmin(admin.ModelAdmin):
     empty_value_display = '-empty-'
     inlines = [RecipeIngredientsInline]
 
-    @admin.display(description='Всего избранных')
+    @admin.display(description='Total favorites')
     def total_favorites(self, obj):
         return obj.favorites.count()
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    """Класс для настройки отображения тегов в панели администратора."""
+    """Class to customize tags display in admin panel."""
 
     list_display = ['pk', 'name', 'color', 'slug']
     search_fields = ['name', 'color', 'slug']
@@ -39,7 +39,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    """Класс для настройки отображения ингредиентов в панели администратора."""
+    """Class to customize ingredients display in admin panel."""
 
     list_display = ['pk', 'name', 'measurement_unit']
     search_fields = ['name', 'measurement_unit']
@@ -49,7 +49,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeIngredients)
 class RecipeIngredientsAdmin(admin.ModelAdmin):
-    """Класс для настройки отображения ингредиентов рецептов в панели администратора."""
+    """Class to customize ingredients of recipes display in admin panel."""
 
     list_display = ['pk', 'recipe', 'ingredient', 'amount']
     search_fields = ['recipe', 'ingredient']
@@ -58,7 +58,7 @@ class RecipeIngredientsAdmin(admin.ModelAdmin):
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
-    """Класс для настройки отображения избранных рецептов пользователей в панели администратора."""
+    """Class to customize users' favorite recipes display in admin panel."""
 
     list_display = ['pk', 'user', 'recipe']
     search_fields = ['user', 'recipe']
@@ -67,7 +67,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    """Класс для настройки отображения корзин покупок пользователей в панели администратора."""
+    """Class to customize users' shopping carts display in admin panel."""
 
     list_display = ['pk', 'user', 'recipe']
     search_fields = ['user', 'recipe']

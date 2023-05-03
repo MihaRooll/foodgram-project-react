@@ -2,10 +2,12 @@ from rest_framework.pagination import PageNumberPagination
 
 
 class CustomPageNumberPagination(PageNumberPagination):
-    """ это пользовательский класс пагинации, который расширяет функциональность
-    стандартного класса пагинации PageNumberPagination из фреймворка Django REST Framework"""
+    """ это пользовательский класс пагинации, который расширяет
+    функциональность стандартного класса пагинации PageNumberPagination из
+    фреймворка Django REST Framework"""
 
-    # Указываем параметр запроса, который будет определять количество элементов на странице
+    # Указываем параметр запроса, который будет определять количество
+    # элементов на странице
     page_size_query_param = 'limit'
 
     # Оптимизация для уменьшения нагрузки на базу данных

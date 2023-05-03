@@ -100,6 +100,8 @@ class UserViewSet(
             }
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class CurrentUserView(views.APIView):
     """View class for the current user displaying."""
 
