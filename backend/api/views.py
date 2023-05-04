@@ -90,7 +90,7 @@ class SubscriptionViewSet(
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class CurrentUserView(views.APIView):
+class SelfUserView(views.APIView):
     """View class for the current user displaying."""
 
     permission_classes = [permissions.IsAuthenticated]
@@ -107,7 +107,7 @@ class CurrentUserView(views.APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ChangePasswordView(views.APIView):
+class SetPasswordRetypeView(views.APIView):
     """View class for changing current user's password."""
 
     permission_classes = [permissions.IsAuthenticated]
@@ -128,7 +128,7 @@ class ChangePasswordView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TagDisplayViewSet(viewsets.ReadOnlyModelViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for tags display."""
 
     queryset = Tag.objects.all()
@@ -137,7 +137,7 @@ class TagDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for ingredients display."""
 
     queryset = Ingredient.objects.all()
@@ -148,7 +148,7 @@ class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
 
 
-class RecipeManagementViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     """Viewset for recipes."""
 
     http_method_names = ['get', 'post', 'patch', 'delete']
