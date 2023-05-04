@@ -20,10 +20,10 @@ urlpatterns = [
     path('users/me/', CurrentUserView.as_view()),
     # Маршрут для изменения пароля текущего пользователя
     path('users/set_password/', ChangePasswordView.as_view()),
-    # Включение маршрутов, зарегистрированных в маршрутизаторе
-    path('', include(router.urls)),
     # Маршруты для аутентификации с использованием токенов
     path('auth/', include('djoser.urls.authtoken')),
     # Маршрут для скачивания списка покупок в формате PDF
-    path('recipes/download_shopping_cart/', DownloadShoppingCartView.as_view(), name='download_shopping_cart')
+    path('recipes/download_shopping_cart/', DownloadShoppingCartView.as_view(), name='download_shopping_cart'),
+    # Включение маршрутов, зарегистрированных в маршрутизаторе
+    path('', include(router.urls)),
 ]
