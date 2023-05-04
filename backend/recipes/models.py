@@ -80,8 +80,6 @@ class Recipe(models.Model):
 class RecipeIngredients(models.Model):
     """Class to store ingredients of a particular recipe in the database."""
 
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='recipeingredients')
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE, related_name='recipeingredients')
     amount = models.PositiveIntegerField('Amount')
