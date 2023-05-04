@@ -204,9 +204,9 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             raise serializers.ValidationError(
                 'Unable to add the same tag multiple times.'
             )
-
         ingredients = [
-            item['ingredient'] for item in attrs['recipeingredients_set']]
+            item['ingredient'] for item in attrs.get('recipeingredients', [])
+        ]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
                 'Unable to add the same ingredient multiple times.'
@@ -228,11 +228,21 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipeingredients')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        self.set_recipe_ingredients(recipe, ingredients)
+        with transaction.atomic():
+            # Check if 'recipeingredients_set' is in validated_data, otherwise raise an error
+            if 'recipeingredients_set' not in validated_data:
+                raise serializers.ValidationError("Missing 'recipeingredients_set' in the request data")
+
+            # Extract and remove ingredients from validated data
+            ingredients = validated_data.pop('recipeingredients_set')
+
+            # Create a new recipe
+            recipe = Recipe.objects.create(**validated_data)
+
+            # Create the relationships between the recipe and the ingredients
+            for ingredient_data in ingredients:
+                RecipeIngredients.objects.create(recipe=recipe, **ingredient_data)
+
         return recipe
 
     @transaction.atomic
@@ -255,6 +265,11 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             tag_list.append(serialized_tag)
         repr['tags'] = tag_list
         return repr
+    
+    class Meta:
+    model = Recipe
+    fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited', 'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time', 'recipeingredients_set')
+
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
