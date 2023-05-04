@@ -8,24 +8,23 @@ createlocalsu:
 	python manage.py createsuperuser --email admin@test.com --username admin -v 3
 
 ingr:
-	python manage.py load_ingredients
+    python manage.py load_ingredients
 
 dumpdb:
-	python manage.py dumpdata > fixtures.json
+	python manage.py dumpdata > fixtures.jsom
 
 loaddb:
-	python manage.py loaddata fixtures.json
+	python manage.py loaddata fixtures.jsom
 
 collectstatic:
 	python manage.py collectstatic --no-input
 
 start-local:
-	migrate loaddb collectstatic createlocalsu
+    migrate loaddb collectstatic createlocalsu
 
 flake:
 	flake8 --exclude venv,migrations,settings.py
 
-# Docker-compose commands
 up-compose:
 	docker-compose up -d
 
@@ -54,4 +53,4 @@ loaddb-compose:
 	docker-compose exec -it web python manage.py loaddata fixtures.json
 
 ingr-compose:
-	docker-compose exec -it web python manage.py load_ingredients
+    docker-compose exec -it web python manage.py load_ingredients
