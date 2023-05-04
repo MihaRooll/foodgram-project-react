@@ -128,7 +128,7 @@ class ChangePasswordView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TagDisplayViewSet(viewsets.ReadOnlyModelViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for tags display."""
 
     queryset = Tag.objects.all()
@@ -137,7 +137,7 @@ class TagDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for ingredients display."""
 
     queryset = Ingredient.objects.all()
