@@ -2,10 +2,10 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (IngredientViewSet, RecipeViewSet, SelfUserView,
-                    SetPasswordRetypeView, TagViewSet, UserViewSet)
+                    SetPasswordRetypeView, TagViewSet, SubscriptionViewSet)
 
 router = DefaultRouter()
-router.register('users', UserViewSet)
+router.register('users', SubscriptionViewSet)
 router.register('tags', TagViewSet)
 router.register('ingredients', IngredientViewSet)
 router.register('recipes', RecipeViewSet)
