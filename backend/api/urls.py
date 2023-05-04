@@ -4,7 +4,9 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     IngredientDisplayViewSet, RecipeManagementViewSet, CurrentUserView,
     ChangePasswordView, TagDisplayViewSet, UserViewSet,
-    FavoriteViewSet, ShoppingCartViewSet, DownloadShoppingCartView)
+    FavoriteViewSet, ShoppingCartViewSet, DownloadShoppingCartView
+)
+
 
 # Создание маршрутизатора для API
 router = DefaultRouter()
