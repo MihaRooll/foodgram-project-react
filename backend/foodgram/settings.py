@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Получаем секретный ключ из переменной окружения или используем значение по умолчанию
 SECRET_KEY = os.getenv('SECRET_KEY', default='key')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
