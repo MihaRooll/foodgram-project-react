@@ -34,10 +34,12 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '[::1]',
-    '158.160.8.136',
+    'https://foodgram-earlinn.sytes.net/',
+    'foodgram-earlinn.sytes.net',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost/*',
+    'https://foodgram-earlinn.sytes.net/*',
 ]
 
 # Application definition

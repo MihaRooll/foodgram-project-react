@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import Subscription
+from users.models import User
 
 
 class Tag(models.Model):
@@ -39,7 +39,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag, related_name='recipes', verbose_name='Tags')
     author = models.ForeignKey(
-        Subscription,
+        User,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Author'
@@ -104,7 +104,7 @@ class Favorite(models.Model):
     """Class to store favorite recipes of a user in the database."""
 
     user = models.ForeignKey(
-        Subscription,
+        User,
         on_delete=models.CASCADE,
         related_name='favorites',
         verbose_name='User'
@@ -134,7 +134,7 @@ class ShoppingCart(models.Model):
     """Class to store favorite recipes of a user in the database."""
 
     user = models.ForeignKey(
-        Subscription,
+        User,
         on_delete=models.CASCADE,
         related_name='shopping',
         verbose_name='User'
