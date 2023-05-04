@@ -148,7 +148,7 @@ class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
 
 
-class RecipeManagementViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     """Viewset for recipes."""
 
     http_method_names = ['get', 'post', 'patch', 'delete']
