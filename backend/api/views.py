@@ -262,7 +262,7 @@ class DownloadShoppingCartView(views.APIView):
         bullet_point_symbol = u'\u2022'
 
         recipes_ingredients = RecipeIngredients.objects.filter(
-            recipe__shopping__user=request.user).order_by('ingredient')  # asd
+            recipe__shopping__user=request.user).order_by('ingredient')  # as
         cart = recipes_ingredients.values(
             'ingredient__name', 'ingredient__measurement_unit',
         ).annotate(total=Sum('amount'))
