@@ -196,7 +196,6 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # добавьте следующие методы
     @action(
         methods=['post', 'delete'],
         detail=True,
@@ -215,6 +214,14 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         return self.create_delete_or_scold(ShoppingCart, recipe, request)
 
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+        url_path='download_shopping_cart'
+    )
+    def download_shopping_cart(self, request):
+        return DownloadShoppingCartView(request)
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
