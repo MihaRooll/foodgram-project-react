@@ -9,13 +9,15 @@ from recipes.models import Ingredient, Recipe, RecipeIngredients, Tag
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CustomUserRegistrationSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
-    class Meta:
-        model = User
+    class Meta(UserCreateSerializer.Meta):
         fields = (
             "email",
             "id",
@@ -25,7 +27,7 @@ class CustomUserRegistrationSerializer(UserCreateSerializer):
             "password",
         )
 
-    def validate_username_field(self, value):
+    def validate_username(self, value):
         if value == "me":
             raise serializers.ValidationError(
                 'Невозможно создать пользователя с именем "me".'
@@ -67,8 +69,7 @@ class AuthorSubscriptionSerializer(CustomUserInfoSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta:
-        model = User
+    class Meta(CustomUserInfoSerializer.Meta):
         fields = (
             "email",
             "id",
@@ -79,9 +80,8 @@ class AuthorSubscriptionSerializer(CustomUserInfoSerializer):
             "recipes",
             "recipes_count",
         )
-        depth = 1
 
-    def get_user_recipes(self, obj):
+    def get_recipes(self, obj):
         recipes_limit = self.context["request"].GET.get("recipes_limit")
         if recipes_limit:
             recipes = obj.recipes.all()[: int(recipes_limit)]
@@ -89,7 +89,7 @@ class AuthorSubscriptionSerializer(CustomUserInfoSerializer):
             recipes = obj.recipes.all()
         return RecipeLightSerializer(recipes, many=True, read_only=True).data
 
-    def get_user_recipes_count(self, obj):
+    def get_recipes_count(self, obj):
         return obj.recipes.count()
 
 
@@ -107,7 +107,6 @@ class CustomIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = "__all__"
-
 
 class RecipeIngredientDetailsSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения ингредиентов конкретного рецепта."""
@@ -150,7 +149,6 @@ class RecipeCreationIngredientSerializer(serializers.ModelSerializer):
         new_repr["amount"] = old_repr["amount"]
         return new_repr
 
-
 class DetailedRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения рецептов."""
 
@@ -166,26 +164,18 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            "id",
-            "tags",
-            "author",
-            "ingredients",
-            "is_favorited",
-            "is_in_shopping_cart",
-            "name",
-            "image",
-            "text",
-            "cooking_time",
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
         )
 
-    def get_favorite_status(self, obj):
-        request = self.context.get("request")
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
         return obj.is_favorited(request.user)
 
-    def get_shopping_cart_status(self, obj):
-        request = self.context.get("request")
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
         return obj.is_in_shopping_cart(request.user)
@@ -204,9 +194,9 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             raise serializers.ValidationError(
                 'Unable to add the same tag multiple times.'
             )
-
         ingredients = [
-            item['ingredient'] for item in attrs['recipe_ingredients']]
+            item['ingredient'] for item in attrs.get('recipeingredients', [])
+        ]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
                 'Unable to add the same ingredient multiple times.'
@@ -228,17 +218,29 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipe_ingredients')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        self.set_recipe_ingredients(recipe, ingredients)
-        return recipe
+        try:
+            with transaction.atomic():
+                # Check if 'recipe_ingredients' is in validated_data, otherwise raise an error
+                if 'recipe_ingredients' not in validated_data:
+                    raise serializers.ValidationError("Missing 'recipe_ingredients' in the request data")
+
+                # Extract and remove ingredients from validated data
+                ingredients = validated_data.pop('recipe_ingredients')
+
+                # Create a new recipe
+                recipe = Recipe.objects.create(**validated_data)
+                # Create the relationships between the recipe and the ingredients
+                for ingredient_data in ingredients:
+                    RecipeIngredients.objects.create(recipe=recipe, **ingredient_data)
+            return recipe
+        except Exception as e:
+            logger.exception(f"Error while creating recipe: {e}")
+            raise serializers.ValidationError("Error while creating recipe")
 
     @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipe_ingredients')
+        ingredients = validated_data.pop('recipeingredients')
         instance.ingredients.clear()
         instance.tags.clear()
         super().update(instance, validated_data)
@@ -256,12 +258,6 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         repr['tags'] = tag_list
         return repr
     
-    def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            return obj.is_favorited(request.user)
-        return False
-    
     class Meta:
         model = Recipe
         fields = (
@@ -275,6 +271,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             "image",
             "text",
             "cooking_time",
+            "recipe_ingredients",
         )
 
 
