@@ -11,36 +11,36 @@ from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from users.models import Subscription, Subscription
+from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (CustomChangePasswordSerializer,
-                          CustomUserRegistrationSerializer, CustomUserInfoSerializer,
-                          CustomIngredientSerializer, RecipeCreationSerializer,
-                          RecipeLightSerializer, DetailedRecipeSerializer,
-                          AuthorSubscriptionSerializer, CustomTagSerializer)
+from .serializers import (CustomSetPasswordRetypeSerializer,
+                          CustomUserCreateSerializer, CustomUserSerializer,
+                          IngredientSerializer, RecipeCreateSerializer,
+                          RecipeLightSerializer, RecipeSerializer,
+                          SubscriptionSerializer, TagSerializer)
 
 
-class SubscriptionViewSet(
+class UserViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin,
     mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     """Viewset for users registration and displaying."""
 
-    queryset = Subscription.objects.all()
+    queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return CustomUserRegistrationSerializer
-        return CustomUserInfoSerializer
+            return CustomUserCreateSerializer
+        return CustomUserSerializer
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
-        queryset = Subscription.objects.filter(following__user=request.user)
+        queryset = User.objects.filter(following__user=request.user)
         page = self.paginate_queryset(queryset)
-        serializer = AuthorSubscriptionSerializer(
+        serializer = SubscriptionSerializer(
             page,
             many=True,
             context={
@@ -57,7 +57,7 @@ class SubscriptionViewSet(
         permission_classes=[permissions.IsAuthenticated]
     )
     def subscribe(self, request, pk):
-        author = get_object_or_404(Subscription, id=pk)
+        author = get_object_or_404(User, id=pk)
         subscription = Subscription.objects.filter(
             user=request.user, author=author)
         if request.method == 'DELETE' and not subscription:
@@ -79,7 +79,7 @@ class SubscriptionViewSet(
                 status=status.HTTP_400_BAD_REQUEST
             )
         Subscription.objects.create(user=request.user, author=author)
-        serializer = AuthorSubscriptionSerializer(
+        serializer = SubscriptionSerializer(
             author,
             context={
                 'request': request,
@@ -96,7 +96,7 @@ class CurrentUserView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        serializer = CustomUserInfoSerializer(
+        serializer = CustomUserSerializer(
             request.user,
             context={
                 'request': request,
@@ -113,7 +113,7 @@ class ChangePasswordView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = CustomChangePasswordSerializer(
+        serializer = CustomSetPasswordRetypeSerializer(
             data=request.data,
             context={
                 'request': request,
@@ -132,7 +132,7 @@ class TagDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for tags display."""
 
     queryset = Tag.objects.all()
-    serializer_class = CustomTagSerializer
+    serializer_class = TagSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
@@ -141,7 +141,7 @@ class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for ingredients display."""
 
     queryset = Ingredient.objects.all()
-    serializer_class = CustomIngredientSerializer
+    serializer_class = IngredientSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
     filter_backends = [rf_filters.DjangoFilterBackend]
@@ -166,8 +166,8 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
-            return RecipeCreationSerializer
-        return DetailedRecipeSerializer
+            return RecipeCreateSerializer
+        return RecipeSerializer
 
     def create_delete_or_scold(self, model, recipe, request):
         instance = model.objects.filter(recipe=recipe, user=request.user)
