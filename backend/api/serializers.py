@@ -197,7 +197,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
-        source='recipeingredients_set', many=True)
+        source='recipe_ingredients', many=True)
 
     def validate(self, attrs):
         if len(attrs['tags']) > len(set(attrs['tags'])):
@@ -229,12 +229,12 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def create(self, validated_data):
         with transaction.atomic():
-            # Check if 'recipeingredients_set' is in validated_data, otherwise raise an error
-            if 'recipeingredients_set' not in validated_data:
-                raise serializers.ValidationError("Missing 'recipeingredients_set' in the request data")
+            # Check if 'recipe_ingredients' is in validated_data, otherwise raise an error
+            if 'recipe_ingredients' not in validated_data:
+                raise serializers.ValidationError("Missing 'recipe_ingredients' in the request data")
 
             # Extract and remove ingredients from validated data
-            ingredients = validated_data.pop('recipeingredients_set')
+            ingredients = validated_data.pop('recipe_ingredients')
 
             # Create a new recipe
             recipe = Recipe.objects.create(**validated_data)
@@ -279,7 +279,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             "image",
             "text",
             "cooking_time",
-            "recipeingredients_set",
+            "recipe_ingredients",
         )
 
 
