@@ -23,8 +23,5 @@ urlpatterns = [
     # Включение маршрутов, зарегистрированных в маршрутизаторе
     path('', include(router.urls)),
     # Маршруты для аутентификации с использованием токенов
-    path('auth/', include('djoser.urls.authtoken')),
-    # Маршрут для скачивания списка покупок в формате PDF
-    path('shopping_cart/download/', DownloadShoppingCartView.as_view(), name='download_shopping_cart'),
+    path('auth/', include('djoser.urls.authtoken'))
 ]
-
