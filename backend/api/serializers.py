@@ -257,10 +257,10 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         return repr
     
     def get_is_favorited(self, obj):
-        request = self.context.get("request")
-        if not request or request.user.is_anonymous:
-            return False
-        return obj.favorited_by.filter(user=request.user).exists()
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            return obj.is_favorited(request.user)
+        return False
     
     class Meta:
         model = Recipe
