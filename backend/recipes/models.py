@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User
+from django.core.validators import MinValueValidator
 
 
 class Tag(models.Model):
@@ -78,15 +79,15 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
-    """Class to store ingredients of a particular recipe in the database."""
-
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='recipeingredients', verbose_name='Рецепт')
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients')
-    amount = models.PositiveIntegerField('Amount')
+        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients', verbose_name='Ингредиент')
+    amount = models.PositiveIntegerField('Количество', validators=[MinValueValidator(1)])
 
     class Meta:
-        verbose_name = 'Ingredient of a recipe'
-        verbose_name_plural = 'Ingredients of recipes'
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
@@ -95,7 +96,9 @@ class RecipeIngredients(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.recipe} needs {self.amount} of {self.ingredient}'
+        return f'{self.recipe} требует {self.amount} {self.ingredient}'
+
+
 
 
 class Favorite(models.Model):
