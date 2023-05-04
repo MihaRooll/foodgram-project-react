@@ -36,12 +36,8 @@ class CustomUserInfoSerializer(UserSerializer):
     class Meta:
         model = User
         fields = (
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
+            'email', 'id', 'username', 'first_name',
+            'last_name', 'is_subscribed',
         )
 
     def get_is_subscribed(self, obj):
@@ -68,14 +64,8 @@ class AuthorSubscriptionSerializer(CustomUserInfoSerializer):
     class Meta:
         model = User
         fields = (
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "recipes",
-            "recipes_count",
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count',
         )
         depth = 1
 
@@ -118,12 +108,7 @@ class RecipeIngredientDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredients
-        fields = (
-            "id",
-            "name",
-            "measurement_unit",
-            "amount",
-        )
+        fields = ('id', 'name', 'measurement_unit', 'amount',)
 
 
 class RecipeCreationIngredientSerializer(serializers.ModelSerializer):

@@ -4,7 +4,7 @@ from .models import Subscription, User
 
 
 class UserAdmin(admin.ModelAdmin):
-    """Class to customize users display inadmin panel."""
+    """Class to customize users display in admin panel."""
 
     list_display = [
         'pk', 'username', 'email', 'first_name', 'last_name',
