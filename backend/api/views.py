@@ -22,7 +22,7 @@ from .serializers import (CustomChangePasswordSerializer,
                           AuthorSubscriptionSerializer, CustomTagSerializer)
 
 
-class SubscriptionViewSet(
+class UserViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin,
     mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
