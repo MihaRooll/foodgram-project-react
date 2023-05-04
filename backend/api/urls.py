@@ -9,9 +9,9 @@ from .views import (
 # Создание маршрутизатора для API
 router = DefaultRouter()
 
-router.register('users', UserViewSet) # пользователи
-router.register('tags', TagDisplayViewSet) # теги
-router.register('ingredients', IngredientDisplayViewSet) # ингредиенты
+router.register('users', UserViewSet)  # пользователи
+router.register('tags', TagDisplayViewSet)  # теги
+router.register('ingredients', IngredientDisplayViewSet)  # ингредиенты
 router.register('recipes', RecipeManagementViewSet)  # рецепты
 router.register(
     'favorites', FavoriteViewSet, basename='favorites')  # избранное

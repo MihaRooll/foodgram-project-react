@@ -80,10 +80,15 @@ class Recipe(models.Model):
 
 class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='recipeingredients', verbose_name='Рецепт')
+        Recipe, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Рецепт')
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients', verbose_name='Ингредиент')
-    amount = models.PositiveIntegerField('Количество', validators=[MinValueValidator(1)])
+        Ingredient, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингредиент')
+    amount = models.PositiveIntegerField(
+        'Количество', validators=[MinValueValidator(1)])
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
@@ -97,8 +102,6 @@ class RecipeIngredients(models.Model):
 
     def __str__(self):
         return f'{self.recipe} требует {self.amount} {self.ingredient}'
-
-
 
 
 class Favorite(models.Model):
