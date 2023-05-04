@@ -255,6 +255,27 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             tag_list.append(serialized_tag)
         repr['tags'] = tag_list
         return repr
+    
+    def get_is_favorited(self, obj):
+        request = self.context.get("request")
+        if not request or request.user.is_anonymous:
+            return False
+        return obj.favorited_by.filter(user=request.user).exists()
+    
+    class Meta:
+        model = Recipe
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
