@@ -7,14 +7,14 @@ from djoser.serializers import (CurrentPasswordSerializer, PasswordSerializer,
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, Recipe, RecipeIngredients, Tag
 from rest_framework import serializers
-from users.models import User
+from users.models import Subscription
 
 
 class CustomUserRegistrationSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
     class Meta:
-        model = User
+        model = Subscription
         fields = (
             "email",
             "id",
@@ -38,7 +38,7 @@ class CustomUserInfoSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = Subscription
         fields = (
             "email",
             "id",
@@ -70,7 +70,7 @@ class AuthorSubscriptionSerializer(CustomUserInfoSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = Subscription
         fields = (
             "email",
             "id",

@@ -11,7 +11,7 @@ from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from users.models import Subscription, User
+from users.models import Subscription, Subscription
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
@@ -22,13 +22,13 @@ from .serializers import (CustomChangePasswordSerializer,
                           AuthorSubscriptionSerializer, CustomTagSerializer)
 
 
-class UserViewSet(
+class SubscriptionViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin,
     mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     """Viewset for users registration and displaying."""
 
-    queryset = User.objects.all()
+    queryset = Subscription.objects.all()
     permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
@@ -38,7 +38,7 @@ class UserViewSet(
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
-        queryset = User.objects.filter(following__user=request.user)
+        queryset = Subscription.objects.filter(following__user=request.user)
         page = self.paginate_queryset(queryset)
         serializer = AuthorSubscriptionSerializer(
             page,
@@ -57,7 +57,7 @@ class UserViewSet(
         permission_classes=[permissions.IsAuthenticated]
     )
     def subscribe(self, request, pk):
-        author = get_object_or_404(User, id=pk)
+        author = get_object_or_404(Subscription, id=pk)
         subscription = Subscription.objects.filter(
             user=request.user, author=author)
         if request.method == 'DELETE' and not subscription:
@@ -90,7 +90,7 @@ class UserViewSet(
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class SelfUserView(views.APIView):
+class CurrentUserView(views.APIView):
     """View class for the current user displaying."""
 
     permission_classes = [permissions.IsAuthenticated]
@@ -107,7 +107,7 @@ class SelfUserView(views.APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SetPasswordRetypeView(views.APIView):
+class ChangePasswordView(views.APIView):
     """View class for changing current user's password."""
 
     permission_classes = [permissions.IsAuthenticated]
@@ -128,7 +128,7 @@ class SetPasswordRetypeView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
+class TagDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for tags display."""
 
     queryset = Tag.objects.all()
@@ -137,7 +137,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for ingredients display."""
 
     queryset = Ingredient.objects.all()
@@ -148,7 +148,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeManagementViewSet(viewsets.ModelViewSet):
     """Viewset for recipes."""
 
     http_method_names = ['get', 'post', 'patch', 'delete']

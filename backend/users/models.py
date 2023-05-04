@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
+class Subscription(AbstractUser):
     """Class to store users in the database."""
 
     USERNAME_FIELD = 'email'
@@ -47,13 +47,13 @@ class Subscription(models.Model):
     """Class to store user subscriptions in the database."""
 
     user = models.ForeignKey(
-        User,
+        Subscription,
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='Follower'
     )
     author = models.ForeignKey(
-        User,
+        Subscription,
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Author'
