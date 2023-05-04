@@ -27,4 +27,3 @@ urlpatterns = [
     # Маршрут для скачивания списка покупок в формате PDF
     path('recipes/download_shopping_cart/', DownloadShoppingCartView.as_view(), name='download_shopping_cart')
 ]
-
