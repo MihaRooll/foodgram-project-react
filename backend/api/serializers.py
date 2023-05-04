@@ -10,34 +10,42 @@ from rest_framework import serializers
 from users.models import User
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
-    """Custom serializer for new users registration."""
+class CustomUserRegistrationSerializer(UserCreateSerializer):
+    """Сериализатор для регистрации новых пользователей."""
 
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username', 'first_name',
-            'last_name', 'password',
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "password",
         )
 
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
-                'Unable to create user with username me.'
+                'Невозможно создать пользователя с именем "me".'
             )
         return value
 
 
-class CustomUserSerializer(UserSerializer):
-    """Custom serializer for displaying information on users."""
+class CustomUserInfoSerializer(UserSerializer):
+    """Сериализатор для отображения информации о пользователях."""
 
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username', 'first_name',
-            'last_name', 'is_subscribed',
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
         )
 
     def get_is_subscribed(self, obj):
@@ -47,16 +55,16 @@ class CustomUserSerializer(UserSerializer):
         return obj.following.filter(user=request.user).exists()
 
 
-class CustomSetPasswordRetypeSerializer(
+class CustomChangePasswordSerializer(
     PasswordSerializer, CurrentPasswordSerializer
 ):
-    """Custom serializer to change current user's password."""
+    """Сериализатор для изменения пароля текущего пользователя."""
 
     pass
 
 
-class SubscriptionSerializer(CustomUserSerializer):
-    """Serializer to subscribe to other recipe authors."""
+class AuthorSubscriptionSerializer(CustomUserInfoSerializer):
+    """Сериализатор для подписки на других авторов рецептов."""
 
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -64,8 +72,14 @@ class SubscriptionSerializer(CustomUserSerializer):
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username', 'first_name', 'last_name',
-            'is_subscribed', 'recipes', 'recipes_count',
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
         )
         depth = 1
 
@@ -82,24 +96,24 @@ class SubscriptionSerializer(CustomUserSerializer):
         return obj.recipes.count()
 
 
-class TagSerializer(serializers.ModelSerializer):
-    """Serializer for tags."""
+class CustomTagSerializer(serializers.ModelSerializer):
+    """Сериализатор для тегов."""
 
     class Meta:
         model = Tag
         fields = '__all__'
 
 
-class IngredientSerializer(serializers.ModelSerializer):
-    """Serializer for ingredients."""
+class CustomIngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для ингредиентов."""
 
     class Meta:
         model = Ingredient
         fields = '__all__'
 
 
-class RecipeIngredientsSerializer(serializers.ModelSerializer):
-    """Serializer to display the ingredients of a particular recipe."""
+class RecipeIngredientDetailsSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения ингредиентов конкретного рецепта."""
 
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
@@ -108,18 +122,26 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredients
-        fields = ('id', 'name', 'measurement_unit', 'amount',)
+        fields = (
+            "id",
+            "name",
+            "measurement_unit",
+            "amount",
+        )
 
 
-class RecipeCreateIngredientsSerializer(serializers.ModelSerializer):
-    """Serializer to display ingredients during recipe creation."""
+class RecipeCreationIngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения ингредиентов при создании рецепта."""
 
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient', queryset=Ingredient.objects.all())
 
     class Meta:
         model = RecipeIngredients
-        fields = ('id', 'amount',)
+        fields = (
+            "id",
+            "amount",
+        )   
 
     def to_representation(self, instance):
         old_repr = super().to_representation(instance)
@@ -131,12 +153,12 @@ class RecipeCreateIngredientsSerializer(serializers.ModelSerializer):
         return new_repr
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    """Serializer for displaying recipes."""
+class DetailedRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения рецептов."""
 
-    tags = TagSerializer(many=True)
-    author = CustomUserSerializer(read_only=True)
-    ingredients = RecipeIngredientsSerializer(
+    tags = CustomTagSerializer(many=True)
+    author = CustomUserInfoSerializer(read_only=True)
+    ingredients = RecipeIngredientDetailsSerializer(
         many=True, source='recipeingredients')
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -162,12 +184,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         return obj.is_in_shopping_cart(request.user)
 
 
-class RecipeCreateSerializer(RecipeSerializer):
-    """Serializer for creating and updating recipes."""
+class RecipeCreationSerializer(DetailedRecipeSerializer):
+    """Сериализатор для создания и обновления рецептов."""
 
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
-    ingredients = RecipeCreateIngredientsSerializer(
+    ingredients = RecipeCreationIngredientSerializer(
         source='recipeingredients', many=True)
 
     def validate(self, attrs):
@@ -222,7 +244,7 @@ class RecipeCreateSerializer(RecipeSerializer):
         tag_id_list, tag_list = repr['tags'], []
         for tag_id in tag_id_list:
             tag = get_object_or_404(Tag, id=tag_id)
-            serialized_tag = OrderedDict(TagSerializer(tag).data)
+            serialized_tag = OrderedDict(CustomTagSerializer(tag).data)
             tag_list.append(serialized_tag)
         repr['tags'] = tag_list
         return repr

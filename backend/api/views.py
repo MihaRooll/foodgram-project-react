@@ -15,11 +15,11 @@ from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (CustomSetPasswordRetypeSerializer,
-                          CustomUserCreateSerializer, CustomUserSerializer,
-                          IngredientSerializer, RecipeCreateSerializer,
-                          RecipeLightSerializer, RecipeSerializer,
-                          SubscriptionSerializer, TagSerializer)
+from .serializers import (CustomChangePasswordSerializer,
+                          CustomUserRegistrationSerializer, CustomUserInfoSerializer,
+                          CustomIngredientSerializer, RecipeCreationSerializer,
+                          RecipeLightSerializer, DetailedRecipeSerializer,
+                          AuthorSubscriptionSerializer, CustomTagSerializer)
 
 
 class UserViewSet(
@@ -33,14 +33,14 @@ class UserViewSet(
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return CustomUserCreateSerializer
-        return CustomUserSerializer
+            return CustomUserRegistrationSerializer
+        return CustomUserInfoSerializer
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         queryset = User.objects.filter(following__user=request.user)
         page = self.paginate_queryset(queryset)
-        serializer = SubscriptionSerializer(
+        serializer = AuthorSubscriptionSerializer(
             page,
             many=True,
             context={
@@ -79,7 +79,7 @@ class UserViewSet(
                 status=status.HTTP_400_BAD_REQUEST
             )
         Subscription.objects.create(user=request.user, author=author)
-        serializer = SubscriptionSerializer(
+        serializer = AuthorSubscriptionSerializer(
             author,
             context={
                 'request': request,
@@ -96,7 +96,7 @@ class SelfUserView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        serializer = CustomUserSerializer(
+        serializer = CustomUserInfoSerializer(
             request.user,
             context={
                 'request': request,
@@ -113,7 +113,7 @@ class SetPasswordRetypeView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = CustomSetPasswordRetypeSerializer(
+        serializer = CustomChangePasswordSerializer(
             data=request.data,
             context={
                 'request': request,
@@ -132,7 +132,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for tags display."""
 
     queryset = Tag.objects.all()
-    serializer_class = TagSerializer
+    serializer_class = CustomTagSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
@@ -141,7 +141,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Viewset for ingredients display."""
 
     queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
+    serializer_class = CustomIngredientSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
     filter_backends = [rf_filters.DjangoFilterBackend]
@@ -166,8 +166,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
-            return RecipeCreateSerializer
-        return RecipeSerializer
+            return RecipeCreationSerializer
+        return DetailedRecipeSerializer
 
     def create_delete_or_scold(self, model, recipe, request):
         instance = model.objects.filter(recipe=recipe, user=request.user)

@@ -149,6 +149,7 @@ class RecipeCreationIngredientSerializer(serializers.ModelSerializer):
         new_repr["amount"] = old_repr["amount"]
         return new_repr
 
+
 class DetailedRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения рецептов."""
 
