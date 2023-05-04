@@ -16,7 +16,8 @@ from users.models import Subscription, User
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (CustomChangePasswordSerializer,
-                          CustomUserRegistrationSerializer, CustomUserInfoSerializer,
+                          CustomUserRegistrationSerializer, 
+                          CustomUserInfoSerializer,
                           CustomIngredientSerializer, RecipeCreationSerializer,
                           RecipeLightSerializer, DetailedRecipeSerializer,
                           AuthorSubscriptionSerializer, CustomTagSerializer)
@@ -214,9 +215,11 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         return self.create_delete_or_scold(ShoppingCart, recipe, request)
 
-    @action(detail=False, permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, permission_classes=[permissions.IsAuthenticated],
+            methods=['get'])
     def download_shopping_cart(self, request):
-        return DownloadShoppingCartView(request)
+        view = DownloadShoppingCartView()
+        return view.get(request)
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
@@ -230,6 +233,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ShoppingCartViewSet(viewsets.ModelViewSet):
     queryset = ShoppingCart.objects.all()
     serializer_class = RecipeLightSerializer
@@ -240,6 +244,7 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class DownloadShoppingCartView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
