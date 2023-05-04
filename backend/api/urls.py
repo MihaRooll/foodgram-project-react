@@ -1,12 +1,10 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (
-    IngredientDisplayViewSet, RecipeManagementViewSet, CurrentUserView,
-    ChangePasswordView, TagDisplayViewSet, UserViewSet,
-    FavoriteViewSet, ShoppingCartViewSet, DownloadShoppingCartView
-)
-
+from .views import (ChangePasswordView, CurrentUserView,
+                    DownloadShoppingCartView, FavoriteViewSet,
+                    IngredientDisplayViewSet, RecipeManagementViewSet,
+                    ShoppingCartViewSet, TagDisplayViewSet, UserViewSet)
 
 # Создание маршрутизатора для API
 router = DefaultRouter()

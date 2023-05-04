@@ -2,6 +2,8 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as rf_filters
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredients,
+                            ShoppingCart, Tag)
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import registerFont
 from reportlab.pdfbase.ttfonts import TTFont
@@ -9,21 +11,17 @@ from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-from recipes.models import (
-    Favorite, Ingredient, Recipe, RecipeIngredients, ShoppingCart, Tag
-)
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (
-    AuthorSubscriptionSerializer, CustomChangePasswordSerializer,
-    CustomIngredientSerializer, CustomTagSerializer,
-    CustomUserRegistrationSerializer, CustomUserInfoSerializer,
-    DetailedRecipeSerializer, RecipeCreationSerializer,
-    RecipeLightSerializer
-)
+from .serializers import (AuthorSubscriptionSerializer,
+                          CustomChangePasswordSerializer,
+                          CustomIngredientSerializer, CustomTagSerializer,
+                          CustomUserInfoSerializer,
+                          CustomUserRegistrationSerializer,
+                          DetailedRecipeSerializer, RecipeCreationSerializer,
+                          RecipeLightSerializer)
 
 
 class UserViewSet(
