@@ -9,6 +9,9 @@ from recipes.models import Ingredient, Recipe, RecipeIngredients, Tag
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CustomUserRegistrationSerializer(UserCreateSerializer):
@@ -204,9 +207,9 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             raise serializers.ValidationError(
                 'Unable to add the same tag multiple times.'
             )
-
         ingredients = [
-            item['ingredient'] for item in attrs['recipe_ingredients']]
+            item['ingredient'] for item in attrs.get('recipeingredients', [])
+        ]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
                 'Unable to add the same ingredient multiple times.'
@@ -228,17 +231,29 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipe_ingredients')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        self.set_recipe_ingredients(recipe, ingredients)
-        return recipe
+        try:
+            with transaction.atomic():
+                # Check if 'recipe_ingredients' is in validated_data, otherwise raise an error
+                if 'recipe_ingredients' not in validated_data:
+                    raise serializers.ValidationError("Missing 'recipe_ingredients' in the request data")
+
+                # Extract and remove ingredients from validated data
+                ingredients = validated_data.pop('recipe_ingredients')
+
+                # Create a new recipe
+                recipe = Recipe.objects.create(**validated_data)
+                # Create the relationships between the recipe and the ingredients
+                for ingredient_data in ingredients:
+                    RecipeIngredients.objects.create(recipe=recipe, **ingredient_data)
+            return recipe
+        except Exception as e:
+            logger.exception(f"Error while creating recipe: {e}")
+            raise serializers.ValidationError("Error while creating recipe")
 
     @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipe_ingredients')
+        ingredients = validated_data.pop('recipeingredients')
         instance.ingredients.clear()
         instance.tags.clear()
         super().update(instance, validated_data)
@@ -255,6 +270,22 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             tag_list.append(serialized_tag)
         repr['tags'] = tag_list
         return repr
+    
+    class Meta:
+        model = Recipe
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+            "recipe_ingredients",
+        )
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
