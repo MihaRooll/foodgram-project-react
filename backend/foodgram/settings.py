@@ -12,7 +12,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Получаем секретный ключ из переменной окружения или используем значение по умолчанию
+# Получаем секретный ключ из переменной окружения или используем значение по умолчани
 SECRET_KEY = os.getenv('SECRET_KEY', default='key')
 
 DEBUG = True
