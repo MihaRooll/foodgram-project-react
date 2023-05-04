@@ -22,7 +22,7 @@ from .serializers import (CustomChangePasswordSerializer,
                           AuthorSubscriptionSerializer, CustomTagSerializer)
 
 
-class SubscriptionViewSet(
+class UserViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin,
     mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
@@ -90,7 +90,7 @@ class SubscriptionViewSet(
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class CurrentUserView(views.APIView):
+class SelfUserView(views.APIView):
     """View class for the current user displaying."""
 
     permission_classes = [permissions.IsAuthenticated]
