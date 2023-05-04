@@ -267,9 +267,20 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         return repr
     
     class Meta:
-    model = Recipe
-    fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited', 'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time', 'recipeingredients_set')
-
+        model = Recipe
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "is_favorited",
+            "is_in_shopping_cart",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+            "recipeingredients_set",
+        )
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
