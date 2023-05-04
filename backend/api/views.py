@@ -16,7 +16,7 @@ from users.models import Subscription, User
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (CustomChangePasswordSerializer,
-                          CustomUserRegistrationSerializer, 
+                          CustomUserRegistrationSerializer,
                           CustomUserInfoSerializer,
                           CustomIngredientSerializer, RecipeCreationSerializer,
                           RecipeLightSerializer, DetailedRecipeSerializer,
