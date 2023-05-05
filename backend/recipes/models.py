@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from users.models import User
+from .models import RecipeIngredients
 
 
 class Tag(models.Model):
@@ -46,7 +47,7 @@ class Recipe(models.Model):
         verbose_name='Author'
     )
     ingredients = models.ManyToManyField(
-        Ingredient,
+        RecipeIngredients,
         through='RecipeIngredients',
         related_name='recipes',
         verbose_name='Ingredients'
