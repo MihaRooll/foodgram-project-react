@@ -88,12 +88,11 @@ jobs:
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
             sudo docker-compose up -d
-            docker-compose exec web python manage.py makemigrations
-            sudo docker-compose exec -T backend python manage.py migrate
-            echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='${{ secrets.ADMIN_USERNAME }}').exists() or User.objects.create_superuser('${{ secrets.ADMIN_USERNAME }}', '${{ secrets.ADMIN_USERNAME }}@admin.zz', '${{ secrets.ADMIN_PASSWORD }}')" | sudo docker-compose exec -T backend python manage.py shell
-            sudo docker-compose exec backend python manage.py load_ingredients
-            sudo docker-compose exec backend python manage.py load_tags
-            sudo docker-compose exec backend python manage.py collectstatic --no-input
+            sudo docker-compose exec web python manage.py makemigrations
+            sudo docker-compose exec web python manage.py migrate
+            sudo DJANGO_SUPERUSER_PASSWORD=${{ secrets.ADMIN_PASSWORD }} docker-compose exec web python manage.py createsuperuser --no-input --email ${{ secrets.ADMIN_USERNAME }}@mail.ru --username ${{ secrets.ADMIN_USERNAME }}
+            docker-compose exec web python manage.py collectstatic --no-input
+            docker-compose exec web python manage.py load_ingredients
             sudo docker system prune -af
             sudo docker volume prune -f
 
