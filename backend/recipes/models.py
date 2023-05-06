@@ -49,7 +49,6 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         RecipeIngredients,
-        through='RecipeIngredients',
         related_name='recipes',
         verbose_name='Ingredients'
     )
