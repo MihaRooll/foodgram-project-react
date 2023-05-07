@@ -171,57 +171,6 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
             return RecipeCreationSerializer
         return DetailedRecipeSerializer
 
-    def create_delete_or_scold(self, model, recipe, request):
-        instance = model.objects.filter(recipe=recipe, user=request.user)
-        name = model.__name__
-        if request.method == 'DELETE' and not instance:
-            return Response(
-                {'errors': f'This recipe was not on your {name} list.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if request.method == 'DELETE':
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        if instance:
-            return Response(
-                {'errors': f'This recipe was already on your {name} list.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        model.objects.create(user=request.user, recipe=recipe)
-        serializer = RecipeLightSerializer(
-            recipe,
-            context={
-                'request': request,
-                'format': self.format_kwarg,
-                'view': self
-            }
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        return self.create_delete_or_scold(Favorite, recipe, request)
-
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        return self.create_delete_or_scold(ShoppingCart, recipe, request)
-
-    @action(detail=False, permission_classes=[permissions.IsAuthenticated],
-            methods=['get'])
-    def download_shopping_cart(self, request):
-        view = DownloadShoppingCartView()
-        return view.get(request)
-
 
 class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
@@ -234,6 +183,18 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def favorite(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        return self.create_delete_or_scold(Favorite, recipe, request)
+
+    def create_delete_or_scold(self, model, recipe, request):
+        return create_delete_or(self, model, recipe, request)
+
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
     queryset = ShoppingCart.objects.all()
@@ -245,6 +206,45 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        return self.create_delete_or_scold(ShoppingCart, recipe, request)
+    
+    def create_delete_or_scold(self, model, recipe, request):
+        return create_delete_or(self, model, recipe, request)
+
+def create_delete_or(self, model, recipe, request):
+    instance = model.objects.filter(recipe=recipe, user=request.user)
+    name = model.__name__
+    if request.method == 'DELETE' and not instance:
+        return Response(
+            {'errors': f'This recipe was not on your {name} list.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    if request.method == 'DELETE':
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    if instance:
+        return Response(
+            {'errors': f'This recipe was already on your {name} list.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    model.objects.create(user=request.user, recipe=recipe)
+    serializer = RecipeLightSerializer(
+        recipe,
+        context={
+            'request': request,
+            'format': self.format_kwarg,
+            'view': self
+        }
+    )
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DownloadShoppingCartView(views.APIView):
