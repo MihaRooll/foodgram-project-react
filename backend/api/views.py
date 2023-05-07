@@ -215,9 +215,10 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         return self.create_delete_or_scold(ShoppingCart, recipe, request)
-    
+
     def create_delete_or_scold(self, model, recipe, request):
         return create_delete_or(self, model, recipe, request)
+
 
 def create_delete_or(self, model, recipe, request):
     instance = model.objects.filter(recipe=recipe, user=request.user)
