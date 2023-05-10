@@ -205,6 +205,8 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         author = self.context['request'].user
         if 'author' in validated_data:
             del validated_data['author']
+        if 'recipeingredients' in validated_data:
+            del validated_data['recipeingredients']
         recipe = Recipe.objects.create(author=author, **validated_data)
         self.tags_and_ingredients_set(recipe, tags, ingredients)
         return recipe
