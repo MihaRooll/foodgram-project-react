@@ -2,8 +2,6 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from users.models import User
 
-from .models import RecipeIngredients
-
 
 class Tag(models.Model):
     """Class to store recipe tags in the database."""
