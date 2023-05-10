@@ -171,19 +171,15 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
         source='recipeingredients_set', many=True)
 
     def validate(self, attrs):
-        if len(attrs['tags']) > len(set(attrs['tags'])):
-            raise serializers.ValidationError(
-                'Unable to add the same tag multiple times.'
-            )
-
-        ingredients = [
-            item['ingredient'] for item in attrs['recipeingredients']]
-        if len(ingredients) > len(set(ingredients)):
-            raise serializers.ValidationError(
-                'Unable to add the same ingredient multiple times.'
-            )
-
+        if self.context['request'].method == 'POST':
+            ingredients = [
+                item['ingredient'] for item in attrs['recipeingredients_set']]
+            if not ingredients:
+                raise serializers.ValidationError("You should provide at least one ingredient.")
+            if len(set(ingredients)) != len(ingredients):
+                raise serializers.ValidationError("You have duplicate ingredients.")
         return attrs
+
 
     @transaction.atomic
     def set_recipe_ingredients(self, recipe, ingredients):
