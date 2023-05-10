@@ -10,7 +10,6 @@ services:
 
   web:
     image: miharoll/foodgram-backend:latest
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     restart: always
     volumes:
       - static_value:/app/static_backend/
