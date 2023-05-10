@@ -187,14 +187,13 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def set_recipe_ingredients(self, recipe, ingredients):
-        recipe_ingredients = []
-        for ingredient in ingredients:
-            recipe_ingredient = RecipeIngredients(
-                recipe=recipe,
-                ingredient_id=ingredient['ingredient'],
-                amount=ingredient['amount']
+        recipe_ingredients = [
+            RecipeIngredients(
+                ingredient=current_ingredient['ingredient'],
+                amount=current_ingredient['amount'],
             )
-            recipe_ingredients.append(recipe_ingredient)
+            for current_ingredient in ingredients
+        ]
         RecipeIngredients.objects.bulk_create(recipe_ingredients)
 
     @transaction.atomic
