@@ -2,8 +2,6 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from users.models import User
 
-from .models import RecipeIngredients
-
 
 class Tag(models.Model):
     """Class to store recipe tags in the database."""
@@ -34,6 +32,28 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeIngredients(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингредиент')
+    amount = models.PositiveIntegerField(
+        'Количество', validators=[MinValueValidator(1)])
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'amount'],
+                name='unique_ingredient_amount'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.amount} {self.ingredient}'
 
 
 class Recipe(models.Model):
@@ -77,28 +97,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class RecipeIngredients(models.Model):
-    ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE,
-        related_name='recipeingredients',
-        verbose_name='Ингредиент')
-    amount = models.PositiveIntegerField(
-        'Количество', validators=[MinValueValidator(1)])
-
-    class Meta:
-        verbose_name = 'Ингредиент рецепта'
-        verbose_name_plural = 'Ингредиенты рецептов'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['ingredient', 'amount'],
-                name='unique_ingredient_amount'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.amount} {self.ingredient}'
 
 
 class Favorite(models.Model):
