@@ -175,11 +175,12 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             ingredients = [
                 item['ingredient'] for item in attrs['recipeingredients_set']]
             if not ingredients:
-                raise serializers.ValidationError("You should provide at least one ingredient.")
+                raise serializers.ValidationError(
+                    "You should provide at least one ingredient.")
             if len(set(ingredients)) != len(ingredients):
-                raise serializers.ValidationError("You have duplicate ingredients.")
+                raise serializers.ValidationError(
+                    "You have duplicate ingredients.")
         return attrs
-
 
     @transaction.atomic
     def set_recipe_ingredients(self, recipe, ingredients):
