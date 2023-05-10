@@ -35,12 +35,20 @@ class Ingredient(models.Model):
 
 
 class RecipeIngredients(models.Model):
+    recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Рецепт'
+    )
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE,
         related_name='recipeingredients',
-        verbose_name='Ингредиент')
+        verbose_name='Ингредиент'
+    )
     amount = models.PositiveIntegerField(
-        'Количество', validators=[MinValueValidator(1)])
+        'Количество', validators=[MinValueValidator(1)]
+    )
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
