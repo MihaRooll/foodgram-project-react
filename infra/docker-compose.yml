@@ -20,7 +20,7 @@ services:
       - db
 
   frontend:
-    image: miharoll/foodgram-frontend
+    image: miharoll/foodgram-frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     env_file: ./.env

@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredients,
-                     ShoppingCart, Tag)
+from .models import Favorite, Ingredient, Recipe, RecipeIngredients, ShoppingCart, Tag
 
 
 class RecipeIngredientsInline(admin.TabularInline):
@@ -44,16 +43,15 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name', 'measurement_unit']
     search_fields = ['name', 'measurement_unit']
     list_filter = ['name', 'measurement_unit']
-    inlines = [RecipeIngredientsInline]
 
 
 @admin.register(RecipeIngredients)
 class RecipeIngredientsAdmin(admin.ModelAdmin):
     """Class to customize ingredients of recipes display in admin panel."""
 
-    list_display = ['pk', 'recipe', 'ingredient', 'amount']
-    search_fields = ['recipe', 'ingredient']
-    list_filter = ['recipe', 'ingredient']
+    list_display = ['pk', 'ingredient', 'amount']
+    search_fields = ['ingredient']
+    list_filter = ['ingredient']
 
 
 @admin.register(Favorite)
