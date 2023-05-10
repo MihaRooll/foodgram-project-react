@@ -180,7 +180,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             item['ingredient'] for item in attrs['recipeingredients']]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
-                'Unable to add the same ingredient multiple times'
+                'Unable to add the same ingredient multiple times.'
             )
 
         return attrs
