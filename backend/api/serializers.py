@@ -137,7 +137,7 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
     tags = CustomTagSerializer(many=True)
     author = CustomUserInfoSerializer(read_only=True)
     ingredients = RecipeIngredientDetailsSerializer(
-        many=True, source='recipeingredients_set')
+        many=True, source='recipeingredients')
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -168,25 +168,27 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
-        source='recipeingredients_set', many=True)
+        source='recipeingredients', many=True)
 
     def validate(self, attrs):
-        if self.context['request'].method == 'POST':
-            ingredients = [
-                item['ingredient'] for item in attrs['recipeingredients_set']]
-            if not ingredients:
-                raise serializers.ValidationError(
-                    "You should provide at least one ingredient.")
-            if len(set(ingredients)) != len(ingredients):
-                raise serializers.ValidationError(
-                    "You have duplicate ingredients.")
+        if len(attrs['tags']) > len(set(attrs['tags'])):
+            raise serializers.ValidationError(
+                'Unable to add the same tag multiple times.'
+            )
+
+        ingredients = [
+            item['ingredient'] for item in attrs['recipeingredients']]
+        if len(ingredients) > len(set(ingredients)):
+            raise serializers.ValidationError(
+                'Unable to add the same ingredient multiple times.'
+            )
+
         return attrs
 
     @transaction.atomic
     def set_recipe_ingredients(self, recipe, ingredients):
         recipe_ingredients = [
             RecipeIngredients(
-                recipe=recipe,
                 ingredient=current_ingredient['ingredient'],
                 amount=current_ingredient['amount'],
             )
@@ -197,7 +199,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('recipeingredients')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.set_recipe_ingredients(recipe, ingredients)
@@ -206,7 +208,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('recipeingredients')
         instance.ingredients.clear()
         instance.tags.clear()
         super().update(instance, validated_data)
