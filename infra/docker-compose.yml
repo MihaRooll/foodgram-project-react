@@ -9,7 +9,7 @@ services:
     env_file: ./.env
 
   web:
-    image: miharoll/foodgram:v.01
+    image: miharoll/foodgram-backend
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     restart: always
     volumes:
@@ -20,7 +20,7 @@ services:
       - db
 
   frontend:
-    image: miharoll/foodgram_frontend:v.1
+    image: miharoll/foodgram-frontend
     volumes:
       - ../frontend/:/app/result_build/
     env_file: ./.env
