@@ -44,7 +44,7 @@ class User(AbstractUser):
 
 
 class Subscription(models.Model):
-    """Class to store user subscriptions in the database."""
+    """Class to store user subscriptions in the database"""
 
     user = models.ForeignKey(
         User,
