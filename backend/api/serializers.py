@@ -180,35 +180,30 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             item['ingredient'] for item in attrs['recipeingredients']]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
-                'Unable to add the same ingredient multiple time'
+                'Unable to add the same ingredient multiple times.'
             )
 
         return attrs
 
     @transaction.atomic
-    def set_recipe_ingredients(self, recipe, ingredients_data):
-        recipe_ingredients = []
-        for ingredient_data in ingredients_data:
-            ingredient = ingredient_data['ingredient']
-            amount = ingredient_data['amount']
-            recipe_ingredients.append(RecipeIngredients(
-                ingredient=ingredient,
-                amount=amount
-            ))
+    def set_recipe_ingredients(self, recipe, ingredients):
+        recipe_ingredients = [
+            RecipeIngredients(
+                ingredient=current_ingredient['ingredient'],
+                amount=current_ingredient['amount'],
+            )
+            for current_ingredient in ingredients
+        ]
         RecipeIngredients.objects.bulk_create(recipe_ingredients)
-        recipe.ingredients.add(*recipe_ingredients)
+
 
     @transaction.atomic
     def create(self, validated_data):
-        tags = validated_data.pop('tags', [])
-        ingredients = validated_data.pop('ingredients', [])
-        author = self.context['request'].user
-        if 'author' in validated_data:
-            del validated_data['author']
-        if 'recipeingredients' in validated_data:
-            del validated_data['recipeingredients']
-        recipe = Recipe.objects.create(author=author, **validated_data)
-        self.tags_and_ingredients_set(recipe, tags, ingredients)
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('recipeingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self.set_recipe_ingredients(recipe, ingredients)
         return recipe
 
     @transaction.atomic
