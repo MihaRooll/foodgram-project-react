@@ -7,8 +7,9 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredients,
 class RecipeIngredientsInline(admin.TabularInline):
     """Inline class for the RecipeIngredients model display."""
 
-    model = RecipeIngredients
+    model = 'recipes.RecipeIngredients'
     extra = 1
+    fk_name = 'recipe'
 
 
 @admin.register(Recipe)
