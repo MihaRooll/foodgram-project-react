@@ -189,6 +189,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     def set_recipe_ingredients(self, recipe, ingredients):
         recipe_ingredients = [
             RecipeIngredients(
+                recipe=recipe,
                 ingredient=current_ingredient['ingredient'],
                 amount=current_ingredient['amount'],
             )
