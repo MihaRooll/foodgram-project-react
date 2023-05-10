@@ -67,7 +67,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    """Class to customize users' shopping carts display in admin panel."""
+    """Class to customize users' shopping carts display in admin panel"""
 
     list_display = ['pk', 'user', 'recipe']
     search_fields = ['user', 'recipe']
