@@ -197,7 +197,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipeingredients')
+        ingredients = validated_data.pop('recipeingredients_set')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.set_recipe_ingredients(recipe, ingredients)
@@ -206,7 +206,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipeingredients')
+        ingredients = validated_data.pop('recipeingredients_set')
         instance.ingredients.clear()
         instance.tags.clear()
         super().update(instance, validated_data)
