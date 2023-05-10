@@ -73,11 +73,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker-compose stop foodgram-backend foodgram-frontend
-            sudo docker-compose rm foodgram-backend
-            sudo docker-compose rm foodgram-frontend
-            sudo docker pull miharoll/foodgram-backend:latest
-            sudo docker pull miharoll/foodgram-frontend:latest
+            sudo docker-compose stop foodgram-backend:latest
+            sudo docker-compose rm foodgram-backend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
