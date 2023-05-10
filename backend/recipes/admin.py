@@ -4,14 +4,6 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredients,
                      ShoppingCart, Tag)
 
 
-class RecipeIngredientsInline(admin.TabularInline):
-    """Inline class for the RecipeIngredients model dispay."""
-
-    model = RecipeIngredients  # Исправлено здесь
-    extra = 1
-    fk_name = 'recipe'
-
-
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Class to customize recipes display in admin panel."""
@@ -23,7 +15,7 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ['total_favorites']
     list_filter = ['name', 'pub_date', 'author', 'tags']
     empty_value_display = '-empty-'
-    inlines = [RecipeIngredientsInline]
+    filter_horizontal = ['ingredients']  # Добавлено здесь
 
     @admin.display(description='Total favorites')
     def total_favorites(self, obj):
