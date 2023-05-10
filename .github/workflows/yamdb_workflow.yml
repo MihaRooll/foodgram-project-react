@@ -73,10 +73,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker-compose stop 
-            sudo docker-compose rm backend
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
+            sudo docker pull miharoll/foodgram:v.01
+            sudo docker pull miharoll/foodgram_frontend:v.1
+            sudo docker-compose stop
+            sudo docker-compose rm web
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -90,6 +90,11 @@ jobs:
             sudo docker-compose up -d
             sudo docker-compose exec web python manage.py makemigrations
             sudo docker-compose exec web python manage.py migrate
+            docker-compose exec web python manage.py collectstatic --no-input
+            docker-compose exec web python manage.py load_ingredients
+            sudo docker system prune -af
+            sudo docker volume prune -f
+
   send_message:
     name: Send Telegram notification
     runs-on: ubuntu-latest
