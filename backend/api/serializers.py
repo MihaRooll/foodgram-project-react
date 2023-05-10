@@ -137,7 +137,7 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
     tags = CustomTagSerializer(many=True)
     author = CustomUserInfoSerializer(read_only=True)
     ingredients = RecipeIngredientDetailsSerializer(
-        many=True, source='recipeingredients')
+        many=True, source='recipeingredients_set')
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -168,7 +168,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
-        source='recipeingredients', many=True)
+        source='recipeingredients_set', many=True)
 
     def validate(self, attrs):
         if len(attrs['tags']) > len(set(attrs['tags'])):
