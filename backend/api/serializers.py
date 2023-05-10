@@ -200,22 +200,11 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**validated_data)
-
-        recipe_ingredients = []
-        for ingredient_data in ingredients:
-            ingredient = ingredient_data['ingredient']
-            amount = ingredient_data['amount']
-            recipe_ingredients.append(RecipeIngredients(
-                ingredient=ingredient,
-                amount=amount
-            ))
-        RecipeIngredients.objects.bulk_create(recipe_ingredients)
-
-        recipe.ingredients.add(*recipe_ingredients)
-        recipe.save()
-
+        tags = validated_data.pop('tags', [])
+        ingredients = validated_data.pop('ingredients', [])
+        recipe = Recipe.objects.create(
+            author=self.context['request'].user, **validated_data)
+        self.tags_and_ingredients_set(recipe, tags, ingredients)
         return recipe
 
     @transaction.atomic
