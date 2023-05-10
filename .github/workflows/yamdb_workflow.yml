@@ -50,7 +50,7 @@ jobs:
           context: ./backend/
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-backend
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
 
 
       - name: Build and push frontend Docker image
@@ -59,7 +59,7 @@ jobs:
           context: ./frontend/
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
 
   
   deploy:
@@ -75,8 +75,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
             rm .env
