@@ -28,7 +28,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost/*',
 ]
 
-# Application definition
+# Application definitio
 
 INSTALLED_APPS = [
     'django.contrib.admin',

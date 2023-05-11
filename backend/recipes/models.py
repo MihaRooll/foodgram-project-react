@@ -2,6 +2,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from users.models import User
 
+from .models import RecipeIngredients
+
 
 class Tag(models.Model):
     """Class to store recipe tags in the database."""
@@ -35,7 +37,7 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    """Class to store recipes in the database"""
+    """Class to store recipes in the database."""
 
     tags = models.ManyToManyField(
         Tag, related_name='recipes', verbose_name='Tags')
@@ -46,8 +48,7 @@ class Recipe(models.Model):
         verbose_name='Author'
     )
     ingredients = models.ManyToManyField(
-        Ingredient,
-        through='RecipeIngredients',
+        RecipeIngredients,
         related_name='recipes',
         verbose_name='Ingredients'
     )
@@ -79,10 +80,6 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE,
-        related_name='recipeingredients',
-        verbose_name='Рецепт')
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE,
         related_name='recipeingredients',
@@ -93,9 +90,15 @@ class RecipeIngredients(models.Model):
     class Meta:
         verbose_name = 'Ингредиент рецепта'
         verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'amount'],
+                name='unique_ingredient_amount'
+            )
+        ]
 
     def __str__(self):
-        return f'{self.recipe} требует {self.amount} {self.ingredient}'
+        return f'{self.amount} {self.ingredient}'
 
 
 class Favorite(models.Model):
