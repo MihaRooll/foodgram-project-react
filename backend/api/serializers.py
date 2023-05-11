@@ -137,7 +137,7 @@ class DetailedRecipeSerializer(serializers.ModelSerializer):
     tags = CustomTagSerializer(many=True)
     author = CustomUserInfoSerializer(read_only=True)
     ingredients = RecipeIngredientDetailsSerializer(
-        many=True, source='recipe_ingredients')
+        many=True, source='recipeingredients')
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -168,7 +168,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
-        source='recipe_ingredients', many=True)
+        source='recipeingredients', many=True)
 
     def validate(self, attrs):
         if len(attrs['tags']) > len(set(attrs['tags'])):
@@ -177,7 +177,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
             )
 
         ingredients = [
-            item['ingredient'] for item in attrs['recipe_ingredients']]
+            item['ingredient'] for item in attrs['recipeingredients']]
         if len(ingredients) > len(set(ingredients)):
             raise serializers.ValidationError(
                 'Unable to add the same ingredient multiple times.'
@@ -200,7 +200,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipe_ingredients')
+        ingredients = validated_data.pop('recipeingredients')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.set_recipe_ingredients(recipe, ingredients)
@@ -209,7 +209,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipe_ingredients')
+        ingredients = validated_data.pop('recipeingredients')
         instance.ingredients.clear()
         instance.tags.clear()
         super().update(instance, validated_data)

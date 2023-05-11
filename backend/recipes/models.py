@@ -38,8 +38,7 @@ class Recipe(models.Model):
     """Class to store recipes in the database."""
 
     tags = models.ManyToManyField(
-        Tag, related_name='recipes', verbose_name='Tags'
-    )
+        Tag, related_name='recipes', verbose_name='Tags')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -48,7 +47,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        # through='RecipeIngredientRelation',
+        through='RecipeIngredients',
         related_name='recipes',
         verbose_name='Ingredients'
     )
@@ -80,16 +79,14 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
-    recipes = models.ManyToManyField(
-        Recipe,
-        related_name='recipe_ingredients'
-    )
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE,
         related_name='recipeingredients',
-        verbose_name='Ингредиент'
-    )
+        verbose_name='Рецепт')
+    ingredient = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингредиент')
     amount = models.PositiveIntegerField(
         'Количество', validators=[MinValueValidator(1)])
 
@@ -98,27 +95,13 @@ class RecipeIngredients(models.Model):
         verbose_name_plural = 'Ингредиенты рецептов'
         constraints = [
             models.UniqueConstraint(
-                fields=['ingredient', 'amount'],
-                name='unique_ingredient_amount'
-            ),
-            models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='unique_recipe_ingredient'
-            ),
+            )
         ]
 
     def __str__(self):
-        return f'{self.amount} {self.ingredient}'
-
-
-# class RecipeIngredientRelation(models.Model):
-#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-#     ingredient = models.ForeignKey(
-# RecipeIngredients, on_delete=models.CASCADE)
-
-#     class Meta:
-#         verbose_name = 'Recipe Ingredient Relation'
-#         verbose_name_plural = 'Recipe Ingredient Relations'
+        return f'{self.recipe} требует {self.amount} {self.ingredient}'
 
 
 class Favorite(models.Model):
