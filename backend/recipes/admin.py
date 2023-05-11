@@ -51,9 +51,13 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeIngredientsAdmin(admin.ModelAdmin):
     """Class to customize ingredients of recipes display in admin panel."""
 
-    list_display = ['pk', 'recipe', 'ingredient', 'amount']
-    search_fields = ['recipe', 'ingredient']
-    list_filter = ['recipe', 'ingredient']
+    list_display = ['pk', 'recipe_name', 'ingredient', 'amount']
+    search_fields = ['recipe__name', 'ingredient__name']
+    list_filter = ['recipe__name', 'ingredient__name']
+
+    def recipe_name(self, obj):
+        return obj.recipe.name
+    recipe_name.short_description = 'Recipe Name'
 
 
 @admin.register(Favorite)

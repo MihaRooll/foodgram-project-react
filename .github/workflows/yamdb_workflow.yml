@@ -73,8 +73,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull miharoll/foodgram:v.01
-            sudo docker pull miharoll/foodgram_frontend:v.1
+            sudo docker pull miharoll/foodgram-backend:latest
+            sudo docker pull miharoll/foodgram-frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
             rm .env
