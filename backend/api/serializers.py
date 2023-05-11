@@ -168,7 +168,7 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all())
     ingredients = RecipeCreationIngredientSerializer(
-        source='recipeingredients', many=True)
+        source='recipe_ingredients', many=True)
 
     def validate(self, attrs):
         if len(attrs['tags']) > len(set(attrs['tags'])):
