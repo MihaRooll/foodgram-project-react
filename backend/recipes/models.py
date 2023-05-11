@@ -48,7 +48,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='RecipeIngredientRelation',
+        # through='RecipeIngredientRelation',
         related_name='recipes',
         verbose_name='Ingredients'
     )
@@ -80,9 +80,8 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
-    recipe = models.ForeignKey(
+    recipes = models.ManyToManyField(
         Recipe,
-        on_delete=models.CASCADE,
         related_name='recipe_ingredients'
     )
     ingredient = models.ForeignKey(
@@ -112,13 +111,13 @@ class RecipeIngredients(models.Model):
         return f'{self.amount} {self.ingredient}'
 
 
-class RecipeIngredientRelation(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(RecipeIngredients, on_delete=models.CASCADE)
+# class RecipeIngredientRelation(models.Model):
+#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+#     ingredient = models.ForeignKey(RecipeIngredients, on_delete=models.CASCADE)
 
-    class Meta:
-        verbose_name = 'Recipe Ingredient Relation'
-        verbose_name_plural = 'Recipe Ingredient Relations'
+#     class Meta:
+#         verbose_name = 'Recipe Ingredient Relation'
+#         verbose_name_plural = 'Recipe Ingredient Relations'
 
 
 class Favorite(models.Model):
