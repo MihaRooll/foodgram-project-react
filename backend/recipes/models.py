@@ -101,7 +101,11 @@ class RecipeIngredients(models.Model):
             models.UniqueConstraint(
                 fields=['ingredient', 'amount'],
                 name='unique_ingredient_amount'
-            )
+            ),
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient'
+            ),
         ]
 
     def __str__(self):
