@@ -35,7 +35,7 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    """Class to store recipes in the database."""
+    """Class to store recipes in the database"""
 
     tags = models.ManyToManyField(
         Tag, related_name='recipes', verbose_name='Tags')
