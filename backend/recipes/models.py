@@ -113,7 +113,8 @@ class RecipeIngredients(models.Model):
 
 # class RecipeIngredientRelation(models.Model):
 #     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-#     ingredient = models.ForeignKey(RecipeIngredients, on_delete=models.CASCADE)
+#     ingredient = models.ForeignKey(
+# RecipeIngredients, on_delete=models.CASCADE)
 
 #     class Meta:
 #         verbose_name = 'Recipe Ingredient Relation'
