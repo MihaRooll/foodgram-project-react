@@ -115,6 +115,7 @@ class RecipeIngredientRelation(models.Model):
         verbose_name = 'Recipe Ingredient Relation'
         verbose_name_plural = 'Recipe Ingredient Relations'
 
+
 class Favorite(models.Model):
     """Class to store favorite recipes of a user in the database."""
 
