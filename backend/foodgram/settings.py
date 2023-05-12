@@ -24,7 +24,7 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost/*',
 ]
-SERVER_IP_FROM = os.getenv('SERVER_IP_FROM')
+SERVER_IP_FROM = os.getenv('SERVER_IP_FROM', '62.84.122.100')
 if SERVER_IP_FROM:
     ALLOWED_HOSTS.append(SERVER_IP_FROM)
     CSRF_TRUSTED_ORIGINS.append(f'http://{SERVER_IP_FROM}/*')
