@@ -1,12 +1,14 @@
 from django.db.models import BooleanField, ExpressionWrapper, Q
-from django_filters import rest_framework as rf_filters
-from recipes.models import Ingredient, Recipe
+from django_filters import ModelMultipleChoiceFilter
+from django_filters.rest_framework import FilterSet, filters
+
+from recipes.models import Ingredient, Recipe, Tag
 
 
-class IngredientFilter(rf_filters.FilterSet):
+class IngredientFilter(FilterSet):
     """Class for filtering ingredients by their names."""
 
-    name = rf_filters.CharFilter(method='startswith_contains_union_method')
+    name = filters.CharFilter(method='startswith_contains_union_method')
 
     class Meta:
         model = Ingredient
@@ -27,12 +29,16 @@ class IngredientFilter(rf_filters.FilterSet):
         ).order_by('-is_start')
 
 
-class RecipeFilter(rf_filters.FilterSet):
+class RecipeFilter(FilterSet):
     """Class for filtering recipes."""
 
-    tags = rf_filters.AllValuesMultipleFilter(field_name='tags__slug')
-    is_favorited = rf_filters.NumberFilter(method='recipe_boolean_methods')
-    is_in_shopping_cart = rf_filters.NumberFilter(
+    tags = ModelMultipleChoiceFilter(
+        queryset=Tag.objects.all(),
+        field_name='tags__slug',
+        to_field_name='slug',
+    )
+    is_favorited = filters.NumberFilter(method='recipe_boolean_methods')
+    is_in_shopping_cart = filters.NumberFilter(
         method='recipe_boolean_methods')
 
     class Meta:

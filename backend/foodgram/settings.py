@@ -15,18 +15,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Получаем секретный ключ из переменной окружения или используем значение по умолчанию
 SECRET_KEY = os.getenv('SECRET_KEY', default='key')
 
-DEBUG = True
+DEBUG = int(os.getenv('DEBUG', 1))
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "62.84.122.100",
     "[::1]",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost/*',
 ]
+SERVER_IP_FROM = os.getenv('SERVER_IP_FROM')
+if SERVER_IP_FROM:
+    ALLOWED_HOSTS.append(SERVER_IP_FROM)
+    CSRF_TRUSTED_ORIGINS.append(f'http://{SERVER_IP_FROM}/*')
+    CSRF_TRUSTED_ORIGINS.append(f'https://{SERVER_IP_FROM}/*')
+
 
 # Application definition
 
@@ -37,13 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',
-    'recipes.apps.RecipesConfig',
-    'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
     'django_filters',
+    'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
+    'api.apps.ApiConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -83,7 +89,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME', default='postgres'),
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': os.getenv('DB_HOST', default='db'),
+        'HOST': os.getenv('DB_HOST', default='localhost'),
         'PORT': os.getenv('DB_PORT', default='5432'),
     }
 }

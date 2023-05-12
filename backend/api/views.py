@@ -1,9 +1,7 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django_filters import rest_framework as rf_filters
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredients,
-                            ShoppingCart, Tag)
+from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import registerFont
 from reportlab.pdfbase.ttfonts import TTFont
@@ -11,6 +9,9 @@ from reportlab.pdfgen import canvas
 from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredients,
+                            ShoppingCart, Tag)
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
@@ -38,6 +39,8 @@ class UserViewSet(
             return CustomUserRegistrationSerializer
         return CustomUserInfoSerializer
 
+
+class SubscribeViewSet(viewsets.GenericViewSet):
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         queryset = User.objects.filter(following__user=request.user)
@@ -146,7 +149,7 @@ class IngredientDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CustomIngredientSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
-    filter_backends = [rf_filters.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
 
 
@@ -157,7 +160,7 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
-    filter_backends = [rf_filters.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
@@ -171,6 +174,8 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
             return RecipeCreationSerializer
         return DetailedRecipeSerializer
 
+
+class FavoriteViewSet(viewsets.GenericViewSet):
     def create_delete_or_scold(self, model, recipe, request):
         instance = model.objects.filter(recipe=recipe, user=request.user)
         name = model.__name__
@@ -207,6 +212,36 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         return self.create_delete_or_scold(Favorite, recipe, request)
 
+
+class ShoppingCartViewSet(viewsets.GenericViewSet):
+
+    def create_delete_or_scold(self, model, recipe, request):
+        instance = model.objects.filter(recipe=recipe, user=request.user)
+        name = model.__name__
+        if request.method == 'DELETE' and not instance:
+            return Response(
+                {'errors': f'This recipe was not on your {name} list.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if request.method == 'DELETE':
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if instance:
+            return Response(
+                {'errors': f'This recipe was already on your {name} list.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        model.objects.create(user=request.user, recipe=recipe)
+        serializer = RecipeLightSerializer(
+            recipe,
+            context={
+                'request': request,
+                'format': self.format_kwarg,
+                'view': self
+            }
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     @action(
         methods=['post', 'delete'],
         detail=True,
@@ -216,41 +251,12 @@ class RecipeManagementViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         return self.create_delete_or_scold(ShoppingCart, recipe, request)
 
-    @action(detail=False, permission_classes=[permissions.IsAuthenticated],
-            methods=['get'])
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated]
+    )
     def download_shopping_cart(self, request):
-        view = DownloadShoppingCartView()
-        return view.get(request)
-
-
-class FavoriteViewSet(viewsets.ModelViewSet):
-    queryset = Favorite.objects.all()
-    serializer_class = RecipeLightSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class ShoppingCartViewSet(viewsets.ModelViewSet):
-    queryset = ShoppingCart.objects.all()
-    serializer_class = RecipeLightSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class DownloadShoppingCartView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
         header_font_size = 20
         body_font_size = 15
         header_left_margin = 100
@@ -260,9 +266,8 @@ class DownloadShoppingCartView(views.APIView):
         line_spacing = 20
         bottom_margin = 100
         bullet_point_symbol = u'\u2022'
-
         recipes_ingredients = RecipeIngredients.objects.filter(
-            recipe__shopping__user=request.user).order_by('ingredient')  # as
+            recipes__shopping__user=request.user).order_by('ingredient')
         cart = recipes_ingredients.values(
             'ingredient__name', 'ingredient__measurement_unit',
         ).annotate(total=Sum('amount'))
@@ -273,10 +278,7 @@ class DownloadShoppingCartView(views.APIView):
             unit = ingredient['ingredient__measurement_unit']
             total = ingredient['total']
             line = bullet_point_symbol + f' {name} - {total} {unit}'
-            recipes = recipes_ingredients.filter(ingredient__name=name)
-            recipes_names = [
-                (item.recipe.name, item.amount) for item in recipes]
-            shopping_list.append((line, recipes_names))
+            shopping_list.append(line)
 
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="shopping.pdf"'
@@ -289,19 +291,9 @@ class DownloadShoppingCartView(views.APIView):
 
         paper_sheet.setFont('FreeSans', body_font_size)
         y_coordinate = body_first_line_height
-        for ingredient, recipes_names in shopping_list:
+        for ingredient in shopping_list:
             paper_sheet.drawString(body_left_margin, y_coordinate, ingredient)
             y_coordinate -= line_spacing
-
-            for recipe_name in recipes_names:
-                if y_coordinate <= bottom_margin:
-                    paper_sheet.showPage()
-                    y_coordinate = body_first_line_height
-                    paper_sheet.setFont('FreeSans', body_font_size)
-                recipe_line = f'  {recipe_name[0]} ({recipe_name[1]})'
-                paper_sheet.drawString(
-                    body_left_margin, y_coordinate, recipe_line)
-                y_coordinate -= line_spacing
 
             if y_coordinate <= bottom_margin:
                 paper_sheet.showPage()

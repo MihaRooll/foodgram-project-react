@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -34,6 +35,22 @@ class Ingredient(models.Model):
         return self.name
 
 
+class RecipeIngredients(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингредиент')
+    amount = models.PositiveIntegerField(
+        'Количество', validators=[MinValueValidator(1)])
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
+
+    def __str__(self):
+        return f'Ингредиент: {self.ingredient} в кол-ве: {self.amount} '
+
+
 class Recipe(models.Model):
     """Class to store recipes in the database"""
 
@@ -46,8 +63,7 @@ class Recipe(models.Model):
         verbose_name='Author'
     )
     ingredients = models.ManyToManyField(
-        Ingredient,
-        through='RecipeIngredients',
+        RecipeIngredients,
         related_name='recipes',
         verbose_name='Ingredients'
     )
@@ -76,32 +92,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class RecipeIngredients(models.Model):
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE,
-        related_name='recipeingredients',
-        verbose_name='Рецепт')
-    ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE,
-        related_name='recipeingredients',
-        verbose_name='Ингредиент')
-    amount = models.PositiveIntegerField(
-        'Количество', validators=[MinValueValidator(1)])
-
-    class Meta:
-        verbose_name = 'Ингредиент рецепта'
-        verbose_name_plural = 'Ингредиенты рецептов'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'ingredient'],
-                name='unique_recipe_ingredient'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.recipe} требует {self.amount} {self.ingredient}'
 
 
 class Favorite(models.Model):

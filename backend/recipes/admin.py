@@ -22,7 +22,6 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ['total_favorites']
     list_filter = ['name', 'pub_date', 'author', 'tags']
     empty_value_display = '-empty-'
-    inlines = [RecipeIngredientsInline]
 
     @admin.display(description='Total favorites')
     def total_favorites(self, obj):
@@ -51,9 +50,9 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeIngredientsAdmin(admin.ModelAdmin):
     """Class to customize ingredients of recipes display in admin panel."""
 
-    list_display = ['pk', 'recipe', 'ingredient', 'amount']
-    search_fields = ['recipe', 'ingredient']
-    list_filter = ['recipe', 'ingredient']
+    list_display = ['pk', 'ingredient', 'amount']
+    search_fields = ['ingredient']
+    list_filter = ['ingredient']
 
 
 @admin.register(Favorite)

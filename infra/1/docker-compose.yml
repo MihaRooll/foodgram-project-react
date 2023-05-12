@@ -9,14 +9,12 @@ services:
     env_file: ./.env
 
   web:
-    #image: miharoll/foodgram-backend:latest
-    build: ../backend
+    image: miharoll/foodgram-backend:latest
     restart: always
     volumes:
       - static_value:/app/static_backend/
       - media_value:/app/media/
       - dump_value:/app/dump/
-    env_file: ./.env
     depends_on:
       - db
 
