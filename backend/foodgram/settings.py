@@ -1,6 +1,4 @@
-"""
-Настройки Django для проекта foodgram.
-"""
+"""Настройки Django для проекта foodgram."""
 
 import os
 from pathlib import Path
