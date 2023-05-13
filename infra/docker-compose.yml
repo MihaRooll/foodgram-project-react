@@ -9,7 +9,8 @@ services:
     env_file: ./.env
 
   web:
-    #image: miharoll/foodgram-backend:latest
+    container_name: web
+    image: miharoll/foodgram-backend:latest
     build: ../backend
     restart: always
     volumes:
