@@ -76,7 +76,7 @@ jobs:
             sudo docker pull miharoll/foodgram-backend:latest
             sudo docker pull miharoll/foodgram_frontend:v.1
             sudo docker-compose stop
-            sudo docker-compose rm backend
+            sudo docker-compose rm web
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -85,14 +85,13 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo SECRET_KEY=${{ secrets.SECRET_KEY_DJ }} >> .env
             echo SERVER_IP_FROM=${{ secrets.SERVER_IP_FROM }} >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
-            echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
             sudo docker-compose up -d
             sudo docker-compose exec web python manage.py makemigrations
             sudo docker-compose exec web python manage.py migrate
-            sudo DJANGO_SUPERUSER_PASSWORD=${{ secrets.ADMIN_PASSWORD }} docker-compose exec web python manage.py createsuperuser --no-input --email ${{ secrets.ADMIN_USERNAME }}@mail.ru --username ${{ secrets.ADMIN_USERNAME }}
+            sudo DJANGO_SUPERUSER_PASSWORD=${{ secrets.ADMIN_PASSWORD }} docker-compose exec web python manage.py createsuperuser --no-input --email ${{ secrets.ADMIN_USERNAME }}@mail.ru --username ${{ secrets.ADMIN_USERNAME }} --first_name {{ secrets.ADMIN_USERNAME }} --last_name {{ secrets.ADMIN_USERNAME }}
             docker-compose exec web python manage.py collectstatic --no-input
             docker-compose exec web python manage.py load_ingredients
             docker-compose exec web python manage.py load_tags
