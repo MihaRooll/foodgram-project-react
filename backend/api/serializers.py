@@ -183,12 +183,12 @@ class RecipeCreationSerializer(DetailedRecipeSerializer):
 
     @transaction.atomic
     def set_recipe_ingredients(self, ingredients):
-        return [RecipeIngredients.objects.get_or_create(
-            ingredient=current_ingredient['ingredient'],
-            amount=current_ingredient['amount'],
-        )[0]
-                for current_ingredient in ingredients
-                ]
+        return [
+            RecipeIngredients.objects.get_or_create(
+                ingredient=current_ingredient['ingredient'],
+                amount=current_ingredient['amount'])[0]
+            for current_ingredient in ingredients
+        ]
 
     @transaction.atomic
     def create(self, validated_data):
