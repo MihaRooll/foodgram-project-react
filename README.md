@@ -52,13 +52,14 @@ docker-compose up -d
 
 После выполнения команды docker-compose up или docker-compose build будут созданы и запущены контейнеры (db, web, nginx) в фоновом режиме.
 
-В контейнере web необходимо выполнить следующие действия: выполнить миграции, создать суперпользователя для доступа к административной панели, собрать статические файлы и загрузить ингредиенты из файла recipes_ingredients.csv в базу данных.
+В контейнере web необходимо выполнить следующие действия: выполнить миграции, создать суперпользователя для доступа к административной панели, собрать статические файлы и загрузить ингредиенты из файла recipes_ingredients.csv и tags.csv в базу данных.
 
 ```
 docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py createsuperuser
 docker-compose exec web python manage.py collectstatic --no-input
 docker-compose exec web python manage.py load_ingredients
+docker-compose exec web python manage.py load_tags 
 ```
 
 После выполнения этих действий, проект будет доступен по адресу <http://localhost/>.
